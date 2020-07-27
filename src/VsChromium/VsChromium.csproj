@@ -273,6 +273,9 @@
     <Compile Include="Features\ToolWindows\BuildExplorer\ChromeProcessViewModel.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\CodeSearchController.FilePathSearchInfo.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\CodeSearchController.SearchWorkerParams.cs" />
+    <Compile Include="Features\ToolWindows\CodeSearch\FlatFilePositionViewModel.cs" />
+    <Compile Include="Features\ToolWindows\CodeSearch\IFileEntryViewModel.cs" />
+    <Compile Include="Features\ToolWindows\CodeSearch\IFileSystemEntryViewModel.cs" />
     <Compile Include="Views\VsRunningDocTableEvents.cs" />
     <Compile Include="Wpf\HumanReadableBytesValueConverter.cs" />
     <Compile Include="Features\IndexServerInfo\ServerDetailsDialog.xaml.cs">
@@ -283,6 +286,7 @@
       <DependentUpon>ServerStatusDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Features\IndexServerInfo\ServerStatusViewModel.cs" />
+    <Compile Include="Wpf\InvertableBooleanToVisibilityConverter.cs" />
     <Compile Include="Wpf\ListViewSorter.cs" />
     <Compile Include="Wpf\NumberValueConverter.cs" />
     <Compile Include="Features\IndexServerInfo\DirectoryDetailsControl.xaml.cs">

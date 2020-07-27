@@ -13,6 +13,7 @@ namespace VsChromium.Settings {
     private int _searchFilePathsMaxResults;
     private int _searchCodeMaxResults;
     private int _autoSearchDelayMsec;
+    private bool _flattenSearchResults;
     private bool _searchMatchCase;
     private bool _searchMatchWholeWord;
     private bool _searchUseRegEx;
@@ -137,6 +138,17 @@ namespace VsChromium.Settings {
 
         _pathFont = value;
         OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.PathFont));
+      }
+    }
+
+    public bool FlattenSearchResults { 
+      get { return _flattenSearchResults; }
+      set {
+        if (value == _flattenSearchResults)
+          return;
+
+        _flattenSearchResults = value;
+        OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FlattenSearchResults));
       }
     }
 

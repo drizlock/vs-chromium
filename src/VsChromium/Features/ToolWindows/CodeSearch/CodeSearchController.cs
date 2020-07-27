@@ -258,15 +258,15 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       _dispatchThreadServerRequestExecutor.Post(uiRequest);
     }
 
-    public void OpenFileInEditor(FileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length) {
+    public void OpenFileInEditor(IFileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length) {
       OpenFileInEditorWorker(fileEntry, vsTextView => TranslateLineColumnToSpan(vsTextView, lineNumber, columnNumber, length));
     }
 
-    public void OpenFileInEditor(FileEntryViewModel fileEntry, Span? span) {
+    public void OpenFileInEditor(IFileEntryViewModel fileEntry, Span? span) {
       OpenFileInEditorWorker(fileEntry, _ => span);
     }
 
-    private void OpenFileInEditorWorker(FileEntryViewModel fileEntry, Func<IVsTextView, Span?> spanProvider) {
+    private void OpenFileInEditorWorker(IFileEntryViewModel fileEntry, Func<IVsTextView, Span?> spanProvider) {
       // Using "Post" is important: it allows the newly opened document to
       // receive the focus.
       SynchronizationContextProvider.DispatchThreadContext.Post(() => {
@@ -278,11 +278,11 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       });
     }
 
-    public void OpenFileInEditorWith(FileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length) {
+    public void OpenFileInEditorWith(IFileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length) {
       OpenFileInEditorWithWorker(fileEntry, vsTextView => TranslateLineColumnToSpan(vsTextView, lineNumber, columnNumber, length));
     }
 
-    public void OpenFileInEditorWith(FileEntryViewModel fileEntry, Span? span) {
+    public void OpenFileInEditorWith(IFileEntryViewModel fileEntry, Span? span) {
       OpenFileInEditorWithWorker(fileEntry, _ => span);
     }
 
@@ -350,6 +350,14 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           return true;
         }
       }
+      
+      {
+        var flatFileEntry = tvi as FlatFilePositionViewModel;
+        if (flatFileEntry != null) {
+          flatFileEntry.OpenCommand.Execute(flatFileEntry);
+          return true;
+        }
+      }
 
       return false;
     }
@@ -412,6 +420,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     private void GlobalSettingsOnPropertyChanged(object sender, PropertyChangedEventArgs args) {
       var setting = _globalSettingsProvider.GlobalSettings;
+      ViewModel.FlattenSearchResults = setting.FlattenSearchResults;
       ViewModel.MatchCase = setting.SearchMatchCase;
       ViewModel.MatchWholeWord = setting.SearchMatchWholeWord;
       ViewModel.UseRegex = setting.SearchUseRegEx;
@@ -569,7 +578,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       return new Span(line.Start + columnNumber, length);
     }
 
-    private void OpenFileInEditorWithWorker(FileEntryViewModel fileEntry, Func<IVsTextView, Span?> spanProvider) {
+    private void OpenFileInEditorWithWorker(IFileEntryViewModel fileEntry, Func<IVsTextView, Span?> spanProvider) {
       // Using "Post" is important: it allows the newly opened document to
       // receive the focus.
       SynchronizationContextProvider.DispatchThreadContext.Post(() => {
@@ -599,17 +608,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       bool expandAll) {
 
       Action<FileSystemEntryViewModel> setLineColumn = entry => {
-        var fileEntry = entry as FileEntryViewModel;
+        var fileEntry = entry as IFileEntryViewModel;
         if (fileEntry != null && searchInfo.LineNumber >= 0)
           fileEntry.SetLineColumn(searchInfo.LineNumber, searchInfo.ColumnNumber);
       };
-
+      
+      var flattenResults = _globalSettingsProvider.GlobalSettings.FlattenSearchResults;
       var rootNode = new RootTreeViewItemViewModel(StandarImageSourceFactory);
       var result = Enumerable
         .Empty<TreeViewItemViewModel>()
         .ConcatSingle(new TextItemViewModel(StandarImageSourceFactory, rootNode, description))
         .ConcatSingle(new TextWarningItemViewModel(StandarImageSourceFactory, rootNode, additionalWarning), () => !string.IsNullOrEmpty(additionalWarning))
-        .Concat(fileResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, setLineColumn)))
+        .Concat(fileResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, setLineColumn, flattenResults)).SelectMany(x => x))
         .ToList();
       result.ForAll(rootNode.AddChild);
       TreeViewItemViewModel.ExpandNodes(result, expandAll);
@@ -621,12 +631,13 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         string description,
         string additionalWarning,
         bool expandAll) {
+      var flattenResults = _globalSettingsProvider.GlobalSettings.FlattenSearchResults;
       var rootNode = new RootTreeViewItemViewModel(StandarImageSourceFactory);
       var result = Enumerable
         .Empty<TreeViewItemViewModel>()
         .ConcatSingle(new TextItemViewModel(StandarImageSourceFactory, rootNode, description))
         .ConcatSingle(new TextWarningItemViewModel(StandarImageSourceFactory, rootNode, additionalWarning), () => !string.IsNullOrEmpty(additionalWarning))
-        .Concat(searchResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, _ => { })))
+        .Concat(searchResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, _ => { }, flattenResults)).SelectMany(x => x))
         .ToList();
       result.ForAll(rootNode.AddChild);
       TreeViewItemViewModel.ExpandNodes(result, expandAll);

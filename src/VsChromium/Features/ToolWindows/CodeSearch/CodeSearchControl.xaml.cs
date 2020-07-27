@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -196,6 +197,49 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     private void RefreshSearchResults(bool immediate) {
       Controller.PerformSearch(immediate);
+    }
+
+    private void ListBox_OnPreviewKeyDown(object sender, KeyEventArgs e) {
+      if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Return) {
+        foreach(var item in FileListBox.SelectedItems) {
+          e.Handled = Controller.ExecuteOpenCommandForItem(item as TreeViewItemViewModel) || e.Handled;
+        }
+      }
+
+      if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Up) {
+        // If topmost item is selected, move selection to bottom combo box
+        var item = FileListBox.SelectedItem as TreeViewItemViewModel;
+        if (item != null) {
+          var parent = item.ParentViewModel as RootTreeViewItemViewModel;
+          if (parent != null) {
+            if (item == parent.Children.FirstOrDefault()) {
+              SearchFilePathsCombo.Focus();
+              e.Handled = true;
+            }
+          }
+        }
+      }
+
+      if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.C) {
+        StringBuilder copyText = new StringBuilder("");
+        foreach(FlatFilePositionViewModel item in FileListBox.SelectedItems) {
+          copyText.Append(item.CopyText);
+        }
+        Controller.Clipboard.SetText(copyText.ToString());
+        e.Handled = true;
+      }
+    }
+
+    private void ListBoxItem_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {
+      var tvi = sender as ListBoxItem;
+      if (tvi == null)
+        return;
+
+      if (!tvi.IsSelected)
+        return;
+
+      if (Controller.ExecuteOpenCommandForItem(tvi.DataContext as TreeViewItemViewModel))
+        e.Handled = true;
     }
 
     private void TreeViewItem_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {

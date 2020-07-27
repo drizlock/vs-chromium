@@ -33,10 +33,10 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     void FocusQuickSearchCode();
     void FocusQuickSearchFilePaths();
 
-    void OpenFileInEditor(FileEntryViewModel fileEntry, Span? span);
-    void OpenFileInEditor(FileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length);
-    void OpenFileInEditorWith(FileEntryViewModel fileEntry, Span? span);
-    void OpenFileInEditorWith(FileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length);
+    void OpenFileInEditor(IFileEntryViewModel fileEntry, Span? span);
+    void OpenFileInEditor(IFileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length);
+    void OpenFileInEditorWith(IFileEntryViewModel fileEntry, Span? span);
+    void OpenFileInEditorWith(IFileEntryViewModel fileEntry, int lineNumber, int columnNumber, int length);
     void ShowInSourceExplorer(FileSystemEntryViewModel relativePathEntry);
     void BringItemViewModelToView(TreeViewItemViewModel item);
     bool ExecuteOpenCommandForItem(TreeViewItemViewModel item);

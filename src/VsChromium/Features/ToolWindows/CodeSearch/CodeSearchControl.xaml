@@ -61,7 +61,8 @@
       <Setter Property="ItemsSource" Value="{Binding Items}"/>
       <Setter Property="SelectedItem" Value="{Binding SelectedItem}"/>
       <Setter Property="Text" Value="{Binding NewItem, UpdateSourceTrigger=LostFocus}"/>
-    </Style>
+    </Style>  
+    <wpf:InvertableBooleanToVisibilityConverter x:Key="BoolToVisConverter" />
   </UserControl.Resources>
 
   <DockPanel>
@@ -363,256 +364,362 @@
       </StackPanel>
     </Border>
 
-    <!-- TREEVIEW TO SHOW RESULTS -->
+    <!-- TREEVIEW/LISTVIEW TO SHOW RESULTS -->
     <!-- 'RootNode' is the property name of the control's DataContext instance. -->
-    <TreeView
+    <Grid>
+      <ListBox
+      Visibility="{Binding FlattenSearchResults, Converter={StaticResource BoolToVisConverter}}"
       ItemsSource="{Binding RootNodes}"
-      x:Name="FileTreeView" Height="Auto"
+      x:Name="FileListBox" Height="auto" SelectionMode="Extended"
       VirtualizingStackPanel.IsVirtualizing="True"
       VirtualizingStackPanel.VirtualizationMode="Recycling"
       Background="{DynamicResource VsBrush.ToolWindowBackground}"
       Foreground="{DynamicResource VsBrush.WindowText}"
-      PreviewKeyDown="FileTreeView_OnPreviewKeyDown"
-      PreviewMouseRightButtonDown="FileTreeView_PreviewMouseRightButtonDown">
+        PreviewKeyDown="ListBox_OnPreviewKeyDown">
+        <ListBox.ItemContainerStyle>
+          <Style TargetType="ListBoxItem">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+            <EventSetter Event="PreviewMouseDoubleClick" Handler="ListBoxItem_PreviewMouseDoubleClick"/>
+          </Style>
+        </ListBox.ItemContainerStyle>
+        
+        <ListBox.Resources>
+          <Style x:Key="TextExtractTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{Binding DataContext.TextExtractFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+            <Setter Property="FontSize" Value="{Binding DataContext.TextExtractFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+          </Style>
 
-      <TreeView.ItemContainerStyle>
+          <Style x:Key="PathTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{Binding DataContext.PathFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+            <Setter Property="FontSize" Value="{Binding DataContext.PathFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static theme:VsResources.PathForeground}}" />
+          </Style>
 
-        <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
-          <!-- Start: This part is the behavior we customize for VsChromium -->
-          <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-          <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-          <Setter Property="FontWeight" Value="Normal" />
-          <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}" />
-          <EventSetter Event="PreviewMouseDoubleClick" Handler="TreeViewItem_PreviewMouseDoubleClick"/>
-          <EventSetter Event="RequestBringIntoView" Handler="TreeViewItem_RequestBringIntoView"/>
-          <!-- End: This part is the behavior we customize for VsChromium -->
-
-          <!-- Start: TreeView custom template -->
-          <!-- See http://goo.gl/CzQnBG -->
-          <Setter Property="HorizontalContentAlignment" Value="Left" />
-          <Setter Property="Template">
-            <Setter.Value>
-              <ControlTemplate TargetType="TreeViewItem">
-                <StackPanel>
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="Auto" MinWidth="19" />
-                      <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                      <RowDefinition Height="Auto" />
-                      <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <!--
-                             Note that the following do not work, but I believe the top 2 should?!
-                             <ToggleButton IsChecked="{TemplateBinding IsExpanded}" ClickMode="Press" Name="Expander">
-                             <ToggleButton IsChecked="{TemplateBinding Property=IsExpanded}" ClickMode="Press" Name="Expander">
-                             <ToggleButton IsChecked="{TemplateBinding Path=IsExpanded}" ClickMode="Press" Name="Expander">
-                        -->
-                    <ToggleButton IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
-                          ClickMode="Press"
-                          Name="Expander">
-                      <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                          <Setter Property="UIElement.Focusable" Value="false" />
-                          <Setter Property="FrameworkElement.Width" Value="16" />
-                          <Setter Property="FrameworkElement.Height" Value="16" />
-                          <Setter Property="Control.Template">
-                            <Setter.Value>
-                              <ControlTemplate TargetType="ToggleButton">
-                                <Border Padding="5,5,5,5" Background="#00FFFFFF" Width="16" Height="16">
-                                  <Path Fill="#00FFFFFF" Stroke="#FF989898" Name="ExpandPath">
-                                    <Path.Data>
-                                      <PathGeometry Figures="M0,0L0,6L6,0z" />
-                                    </Path.Data>
-                                    <Path.RenderTransform>
-                                      <RotateTransform Angle="135" CenterX="3" CenterY="3" />
-                                    </Path.RenderTransform>
-                                  </Path>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                  <Trigger Property="UIElement.IsMouseOver" Value="True">
-                                    <Setter TargetName="ExpandPath" Property="Shape.Stroke" Value="#FF1BBBFA" />
-                                    <Setter TargetName="ExpandPath" Property="Shape.Fill" Value="#00FFFFFF" />
-                                  </Trigger>
-                                  <Trigger Property="ToggleButton.IsChecked" Value="True">
-                                    <Setter TargetName="ExpandPath" Property="UIElement.RenderTransform">
-                                      <Setter.Value>
-                                        <RotateTransform Angle="180" CenterX="3" CenterY="3" />
-                                      </Setter.Value>
-                                    </Setter>
-                                    <Setter TargetName="ExpandPath" Property="Shape.Fill" Value="#FF595959" />
-                                    <Setter TargetName="ExpandPath" Property="Shape.Stroke" Value="#FF262626" />
-                                  </Trigger>
-                                </ControlTemplate.Triggers>
-                              </ControlTemplate>
-                            </Setter.Value>
-                          </Setter>
-                        </Style>
-                      </ToggleButton.Style>
-                    </ToggleButton>
-                    <Border x:Name="Bd"
-                    HorizontalAlignment="Stretch"
-                    BorderThickness="{TemplateBinding Border.BorderThickness}"
-                    BorderBrush="{TemplateBinding Border.BorderBrush}"
-                    Padding="{TemplateBinding Control.Padding}"
-                    Background="{TemplateBinding Panel.Background}"
-                    SnapsToDevicePixels="True"
-                    Grid.Column="1">
-                      <ContentPresenter x:Name="PART_Header"
-                                Content="{TemplateBinding HeaderedContentControl.Header}"
-                                ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}"
-                                ContentStringFormat="{TemplateBinding HeaderedItemsControl.HeaderStringFormat}"
-                                ContentTemplateSelector="{TemplateBinding HeaderedItemsControl.HeaderTemplateSelector}"
-                                ContentSource="Header"
-                                HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}"
-                                SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
-                    </Border>
-                    <ItemsPresenter x:Name="ItemsHost" Grid.Column="1" Grid.Row="1" />
-                  </Grid>
-                </StackPanel>
-                <ControlTemplate.Triggers>
-                  <Trigger Property="TreeViewItem.IsExpanded" Value="False">
-                    <Setter TargetName="ItemsHost" Property="UIElement.Visibility" Value="Collapsed" />
-                  </Trigger>
-                  <Trigger Property="ItemsControl.HasItems" Value="False">
-                    <Setter TargetName="Expander" Property="UIElement.Visibility" Value="Hidden" />
-                  </Trigger>
-                  <Trigger Property="TreeViewItem.IsSelected" Value="True">
-                    <Setter TargetName="Bd" Property="Panel.Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}" />
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightTextKey}}" />
-                  </Trigger>
-                  <MultiTrigger>
-                    <MultiTrigger.Conditions>
-                      <Condition Property="TreeViewItem.IsSelected" Value="True" />
-                      <Condition Property="Selector.IsSelectionActive" Value="False" />
-                    </MultiTrigger.Conditions>
-                    <Setter TargetName="Bd" Property="Panel.Background" Value="{DynamicResource {x:Static theme:VsResources.SelectedItemBackground}}" />
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
-                  </MultiTrigger>
-                  <Trigger Property="UIElement.IsEnabled" Value="False">
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
-                  </Trigger>
-                </ControlTemplate.Triggers>
-              </ControlTemplate>
-            </Setter.Value>
-          </Setter>
-          <!-- See http://goo.gl/CzQnBG -->
-          <!-- End: TreeView custom template -->
-        </Style>
-
-      </TreeView.ItemContainerStyle>
-
-      <TreeView.Resources>
-        <Style x:Key="TextExtractTextStyle" TargetType="TextBlock">
-          <Setter Property="FontFamily" Value="{Binding DataContext.TextExtractFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
-          <Setter Property="FontSize" Value="{Binding DataContext.TextExtractFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
-        </Style>
-
-        <Style x:Key="PathTextStyle" TargetType="TextBlock">
-          <Setter Property="FontFamily" Value="{Binding DataContext.PathFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
-          <Setter Property="FontSize" Value="{Binding DataContext.PathFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
-        </Style>
-
-        <Style x:Key="DisplayTextStyle" TargetType="TextBlock">
-          <Setter Property="FontFamily" Value="{Binding DataContext.DisplayFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
-          <Setter Property="FontSize" Value="{Binding DataContext.DisplayFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
-        </Style>
-
-        <HierarchicalDataTemplate DataType="{x:Type codesearch:DirectoryEntryViewModel}" ItemsSource="{Binding Children}">
-          <StackPanel Orientation="Horizontal">
-            <StackPanel.ContextMenu>
-              <ContextMenu>
-                <MenuItem Header="Show in Solution Explorer" Command="{Binding OpenCommand}" FontWeight="Bold" />
-                <MenuItem Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}" />
-                <Separator />
-                <MenuItem Header="Copy Full Path" Command="{Binding CopyFullPathCommand}" />
-                <MenuItem Header="Copy Relative Path" Command="{Binding CopyRelativePathCommand}" />
-                <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding CopyFullPathPosixCommand}" />
-                <MenuItem Header="Copy Relative Path  with &quot;/&quot;" Command="{Binding CopyRelativePathPosixCommand}" />
-              </ContextMenu>
-            </StackPanel.ContextMenu>
-            <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
-            <TextBlock Text="{Binding DisplayText}" Style="{StaticResource PathTextStyle}" />
-          </StackPanel>
-        </HierarchicalDataTemplate>
-
-        <HierarchicalDataTemplate DataType="{x:Type codesearch:FileEntryViewModel}" ItemsSource="{Binding Children}">
-          <StackPanel Orientation="Horizontal" >
-            <StackPanel.ContextMenu>
-              <ContextMenu>
-                <MenuItem Header="Open" Command="{Binding OpenCommand}" FontWeight="Bold" />
-                <MenuItem Header="Open With..." Command="{Binding OpenWithCommand}" />
-                <MenuItem Header="Show in Solution Explorer" Command="{Binding ShowInSourceExplorerCommand}" />
-                <MenuItem Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}" />
-                <Separator />
-                <MenuItem Header="Copy Full Path" Command="{Binding CopyFullPathCommand}" />
-                <MenuItem Header="Copy Relative Path" Command="{Binding CopyRelativePathCommand}" />
-                <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding CopyFullPathPosixCommand}" />
-                <MenuItem Header="Copy Relative Path  with &quot;/&quot;" Command="{Binding CopyRelativePathPosixCommand}" />
-              </ContextMenu>
-            </StackPanel.ContextMenu>
-            <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
-            <TextBlock Text="{Binding LineColumnText}" Style="{StaticResource PathTextStyle}"
+          <Style x:Key="DisplayTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{Binding DataContext.DisplayFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+            <Setter Property="FontSize" Value="{Binding DataContext.DisplayFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+          </Style>
+          
+          <DataTemplate DataType="{x:Type codesearch:FlatFilePositionViewModel}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Grid.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Open" Command="{Binding OpenCommand}" FontWeight="Bold" />
+                  <MenuItem Header="Open With..." Command="{Binding OpenWithCommand}" />
+                  <MenuItem Header="Show in Solution Explorer" Command="{Binding ShowInSourceExplorerCommand}" />
+                  <MenuItem Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}" />
+                  <Separator />
+                  <MenuItem Header="Copy" Command="{Binding CopyCommand}"/>
+                  <MenuItem Header="Copy Full Path" Command="{Binding CopyFullPathCommand}" />
+                  <MenuItem Header="Copy Relative Path" Command="{Binding CopyRelativePathCommand}" />
+                  <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding CopyFullPathPosixCommand}" />
+                  <MenuItem Header="Copy Relative Path  with &quot;/&quot;" Command="{Binding CopyRelativePathPosixCommand}" />
+                </ContextMenu>
+              </Grid.ContextMenu>
+              <TextBlock Grid.Column="0" Text="{Binding DisplayText}" Style="{StaticResource PathTextStyle}" />
+              <TextBlock Grid.Column="1" Text="{Binding LineColumnText}" Style="{StaticResource TextExtractTextStyle}"
                        Foreground="{DynamicResource {x:Static theme:VsResources.LineColumnForeground}}"  />
-            <TextBlock Text="{Binding DisplayText}" Style="{StaticResource PathTextStyle}" />
-            <TextBlock Text="{Binding ItemCountText}" Style="{StaticResource PathTextStyle}" FontStyle="Italic" />
-          </StackPanel>
-        </HierarchicalDataTemplate>
-
-        <DataTemplate DataType="{x:Type codesearch:FilePositionViewModel}">
-          <StackPanel Orientation="Horizontal">
-            <StackPanel.ContextMenu>
-              <ContextMenu>
-                <MenuItem Header="Open" Command="{Binding OpenCommand}" FontWeight="Bold" />
-                <MenuItem Header="Open With..." Command="{Binding OpenWithCommand}" />
-                <MenuItem Header="Copy" Command="{Binding CopyCommand}"/>
-              </ContextMenu>
-            </StackPanel.ContextMenu>
-            <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}"/>
-            <TextBlock Text="{Binding LineColumnText}" Style="{StaticResource TextExtractTextStyle}"
-                       Foreground="{DynamicResource {x:Static theme:VsResources.LineColumnForeground}}"  />
-            <TextBlock Text="{Binding TextBeforeMatch}" Style="{StaticResource TextExtractTextStyle}" />
-            <TextBlock Text="{Binding MatchText}" Style="{StaticResource TextExtractTextStyle}"
+              <TextBlock Grid.Column="2" Text="{Binding ItemCountText}" Style="{StaticResource PathTextStyle}" FontStyle="Italic" />
+              <TextBlock Grid.Column="3" Text="{Binding TextBeforeMatch}" Style="{StaticResource TextExtractTextStyle}" />
+              <TextBlock Grid.Column="4" Text="{Binding MatchText}" Style="{StaticResource TextExtractTextStyle}"
                        Foreground="{DynamicResource {x:Static theme:VsResources.SearchMatchHighlightForeground}}"
                        Background="{DynamicResource {x:Static theme:VsResources.SearchMatchHighlightBackground}}" />
-            <TextBlock Text="{Binding TextAfterMatch}" Style="{StaticResource TextExtractTextStyle}"/>
-          </StackPanel>
-        </DataTemplate>
+              <TextBlock Grid.Column="5" Text="{Binding TextAfterMatch}" Style="{StaticResource TextExtractTextStyle}"/>
+            </Grid>
+          </DataTemplate>
 
-        <HierarchicalDataTemplate DataType="{x:Type toolWindows:TextErrorItemViewModel}" ItemsSource="{Binding Children}">
-          <StackPanel Orientation="Horizontal">
-            <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
-            <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
-          </StackPanel>
-        </HierarchicalDataTemplate>
+          <DataTemplate DataType="{x:Type toolWindows:TextErrorItemViewModel}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </DataTemplate>
 
-        <HierarchicalDataTemplate DataType="{x:Type toolWindows:TextWarningItemViewModel}" ItemsSource="{Binding Children}">
-          <StackPanel Orientation="Horizontal">
-            <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
-            <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
-          </StackPanel>
-        </HierarchicalDataTemplate>
+          <DataTemplate DataType="{x:Type toolWindows:TextWarningItemViewModel}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </DataTemplate>
 
-        <!-- Placeholder item used to show "Click here for more results" -->
-        <DataTemplate DataType="{x:Type toolWindows:LazyItemViewModel}">
-          <StackPanel Orientation="Horizontal">
-            <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
-            <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
-          </StackPanel>
-        </DataTemplate>
+          <!-- Placeholder item used to show "Click here for more results" -->
+          <DataTemplate DataType="{x:Type toolWindows:LazyItemViewModel}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </DataTemplate>
 
-        <!-- Simple text string item -->
-        <HierarchicalDataTemplate DataType="{x:Type toolWindows:TextItemViewModel}" ItemsSource="{Binding Children}">
-          <StackPanel Orientation="Horizontal">
-            <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
-            <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
-          </StackPanel>
-        </HierarchicalDataTemplate>
+          <!-- Simple text string item -->
+          <DataTemplate DataType="{x:Type toolWindows:TextItemViewModel}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.Resources>
 
-      </TreeView.Resources>
-    </TreeView>
+      </ListBox>
 
+      <TreeView
+        Visibility="{Binding FlattenSearchResults, Converter={StaticResource BoolToVisConverter}, ConverterParameter='invert'}"
+        ItemsSource="{Binding RootNodes}"
+        x:Name="FileTreeView" Height="Auto"
+        VirtualizingStackPanel.IsVirtualizing="True"
+        VirtualizingStackPanel.VirtualizationMode="Recycling"
+        Background="{DynamicResource VsBrush.ToolWindowBackground}"
+        Foreground="{DynamicResource VsBrush.WindowText}"
+        PreviewKeyDown="FileTreeView_OnPreviewKeyDown"
+        PreviewMouseRightButtonDown="FileTreeView_PreviewMouseRightButtonDown">
+
+        <TreeView.ItemContainerStyle>
+
+          <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+            <!-- Start: This part is the behavior we customize for VsChromium -->
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}" />
+            <EventSetter Event="PreviewMouseDoubleClick" Handler="TreeViewItem_PreviewMouseDoubleClick"/>
+            <EventSetter Event="RequestBringIntoView" Handler="TreeViewItem_RequestBringIntoView"/>
+            <!-- End: This part is the behavior we customize for VsChromium -->
+
+            <!-- Start: TreeView custom template -->
+            <!-- See http://goo.gl/CzQnBG -->
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="TreeViewItem">
+                  <StackPanel>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="19" />
+                        <ColumnDefinition Width="*" />
+                      </Grid.ColumnDefinitions>
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                      </Grid.RowDefinitions>
+                      <!--
+                               Note that the following do not work, but I believe the top 2 should?!
+                               <ToggleButton IsChecked="{TemplateBinding IsExpanded}" ClickMode="Press" Name="Expander">
+                               <ToggleButton IsChecked="{TemplateBinding Property=IsExpanded}" ClickMode="Press" Name="Expander">
+                               <ToggleButton IsChecked="{TemplateBinding Path=IsExpanded}" ClickMode="Press" Name="Expander">
+                          -->
+                      <ToggleButton IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                            ClickMode="Press"
+                            Name="Expander">
+                        <ToggleButton.Style>
+                          <Style TargetType="ToggleButton">
+                            <Setter Property="UIElement.Focusable" Value="false" />
+                            <Setter Property="FrameworkElement.Width" Value="16" />
+                            <Setter Property="FrameworkElement.Height" Value="16" />
+                            <Setter Property="Control.Template">
+                              <Setter.Value>
+                                <ControlTemplate TargetType="ToggleButton">
+                                  <Border Padding="5,5,5,5" Background="#00FFFFFF" Width="16" Height="16">
+                                    <Path Fill="#00FFFFFF" Stroke="#FF989898" Name="ExpandPath">
+                                      <Path.Data>
+                                        <PathGeometry Figures="M0,0L0,6L6,0z" />
+                                      </Path.Data>
+                                      <Path.RenderTransform>
+                                        <RotateTransform Angle="135" CenterX="3" CenterY="3" />
+                                      </Path.RenderTransform>
+                                    </Path>
+                                  </Border>
+                                  <ControlTemplate.Triggers>
+                                    <Trigger Property="UIElement.IsMouseOver" Value="True">
+                                      <Setter TargetName="ExpandPath" Property="Shape.Stroke" Value="#FF1BBBFA" />
+                                      <Setter TargetName="ExpandPath" Property="Shape.Fill" Value="#00FFFFFF" />
+                                    </Trigger>
+                                    <Trigger Property="ToggleButton.IsChecked" Value="True">
+                                      <Setter TargetName="ExpandPath" Property="UIElement.RenderTransform">
+                                        <Setter.Value>
+                                          <RotateTransform Angle="180" CenterX="3" CenterY="3" />
+                                        </Setter.Value>
+                                      </Setter>
+                                      <Setter TargetName="ExpandPath" Property="Shape.Fill" Value="#FF595959" />
+                                      <Setter TargetName="ExpandPath" Property="Shape.Stroke" Value="#FF262626" />
+                                    </Trigger>
+                                  </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                              </Setter.Value>
+                            </Setter>
+                          </Style>
+                        </ToggleButton.Style>
+                      </ToggleButton>
+                      <Border x:Name="Bd"
+                      HorizontalAlignment="Stretch"
+                      BorderThickness="{TemplateBinding Border.BorderThickness}"
+                      BorderBrush="{TemplateBinding Border.BorderBrush}"
+                      Padding="{TemplateBinding Control.Padding}"
+                      Background="{TemplateBinding Panel.Background}"
+                      SnapsToDevicePixels="True"
+                      Grid.Column="1">
+                        <ContentPresenter x:Name="PART_Header"
+                                  Content="{TemplateBinding HeaderedContentControl.Header}"
+                                  ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}"
+                                  ContentStringFormat="{TemplateBinding HeaderedItemsControl.HeaderStringFormat}"
+                                  ContentTemplateSelector="{TemplateBinding HeaderedItemsControl.HeaderTemplateSelector}"
+                                  ContentSource="Header"
+                                  HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}"
+                                  SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                      </Border>
+                      <ItemsPresenter x:Name="ItemsHost" Grid.Column="1" Grid.Row="1" />
+                    </Grid>
+                  </StackPanel>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="TreeViewItem.IsExpanded" Value="False">
+                      <Setter TargetName="ItemsHost" Property="UIElement.Visibility" Value="Collapsed" />
+                    </Trigger>
+                    <Trigger Property="ItemsControl.HasItems" Value="False">
+                      <Setter TargetName="Expander" Property="UIElement.Visibility" Value="Hidden" />
+                    </Trigger>
+                    <Trigger Property="TreeViewItem.IsSelected" Value="True">
+                      <Setter TargetName="Bd" Property="Panel.Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}" />
+                      <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightTextKey}}" />
+                    </Trigger>
+                    <MultiTrigger>
+                      <MultiTrigger.Conditions>
+                        <Condition Property="TreeViewItem.IsSelected" Value="True" />
+                        <Condition Property="Selector.IsSelectionActive" Value="False" />
+                      </MultiTrigger.Conditions>
+                      <Setter TargetName="Bd" Property="Panel.Background" Value="{DynamicResource {x:Static theme:VsResources.SelectedItemBackground}}" />
+                      <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                    </MultiTrigger>
+                    <Trigger Property="UIElement.IsEnabled" Value="False">
+                      <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+            <!-- See http://goo.gl/CzQnBG -->
+            <!-- End: TreeView custom template -->
+          </Style>
+
+        </TreeView.ItemContainerStyle>
+
+        <TreeView.Resources>
+          <Style x:Key="TextExtractTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{Binding DataContext.TextExtractFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+            <Setter Property="FontSize" Value="{Binding DataContext.TextExtractFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+          </Style>
+
+          <Style x:Key="PathTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{Binding DataContext.PathFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+            <Setter Property="FontSize" Value="{Binding DataContext.PathFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+          </Style>
+
+          <Style x:Key="DisplayTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{Binding DataContext.DisplayFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+            <Setter Property="FontSize" Value="{Binding DataContext.DisplayFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
+          </Style>
+
+          <HierarchicalDataTemplate DataType="{x:Type codesearch:DirectoryEntryViewModel}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+              <StackPanel.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Show in Solution Explorer" Command="{Binding OpenCommand}" FontWeight="Bold" />
+                  <MenuItem Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}" />
+                  <Separator />
+                  <MenuItem Header="Copy Full Path" Command="{Binding CopyFullPathCommand}" />
+                  <MenuItem Header="Copy Relative Path" Command="{Binding CopyRelativePathCommand}" />
+                  <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding CopyFullPathPosixCommand}" />
+                  <MenuItem Header="Copy Relative Path  with &quot;/&quot;" Command="{Binding CopyRelativePathPosixCommand}" />
+                </ContextMenu>
+              </StackPanel.ContextMenu>
+              <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding DisplayText}" Style="{StaticResource PathTextStyle}" />
+            </StackPanel>
+          </HierarchicalDataTemplate>
+
+          <HierarchicalDataTemplate DataType="{x:Type codesearch:FileEntryViewModel}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal" >
+              <StackPanel.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Open" Command="{Binding OpenCommand}" FontWeight="Bold" />
+                  <MenuItem Header="Open With..." Command="{Binding OpenWithCommand}" />
+                  <MenuItem Header="Show in Solution Explorer" Command="{Binding ShowInSourceExplorerCommand}" />
+                  <MenuItem Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}" />
+                  <Separator />
+                  <MenuItem Header="Copy Full Path" Command="{Binding CopyFullPathCommand}" />
+                  <MenuItem Header="Copy Relative Path" Command="{Binding CopyRelativePathCommand}" />
+                  <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding CopyFullPathPosixCommand}" />
+                  <MenuItem Header="Copy Relative Path  with &quot;/&quot;" Command="{Binding CopyRelativePathPosixCommand}" />
+                </ContextMenu>
+              </StackPanel.ContextMenu>
+              <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding LineColumnText}" Style="{StaticResource PathTextStyle}"
+                         Foreground="{DynamicResource {x:Static theme:VsResources.LineColumnForeground}}"  />
+              <TextBlock Text="{Binding DisplayText}" Style="{StaticResource PathTextStyle}" />
+              <TextBlock Text="{Binding ItemCountText}" Style="{StaticResource PathTextStyle}" FontStyle="Italic" />
+            </StackPanel>
+          </HierarchicalDataTemplate>
+
+          <DataTemplate DataType="{x:Type codesearch:FilePositionViewModel}">
+            <StackPanel Orientation="Horizontal">
+              <StackPanel.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Open" Command="{Binding OpenCommand}" FontWeight="Bold" />
+                  <MenuItem Header="Open With..." Command="{Binding OpenWithCommand}" />
+                  <MenuItem Header="Copy" Command="{Binding CopyCommand}"/>
+                </ContextMenu>
+              </StackPanel.ContextMenu>
+              <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}"/>
+              <TextBlock Text="{Binding LineColumnText}" Style="{StaticResource TextExtractTextStyle}"
+                         Foreground="{DynamicResource {x:Static theme:VsResources.LineColumnForeground}}"  />
+              <TextBlock Text="{Binding TextBeforeMatch}" Style="{StaticResource TextExtractTextStyle}" />
+              <TextBlock Text="{Binding MatchText}" Style="{StaticResource TextExtractTextStyle}"
+                         Foreground="{DynamicResource {x:Static theme:VsResources.SearchMatchHighlightForeground}}"
+                         Background="{DynamicResource {x:Static theme:VsResources.SearchMatchHighlightBackground}}" />
+              <TextBlock Text="{Binding TextAfterMatch}" Style="{StaticResource TextExtractTextStyle}"/>
+            </StackPanel>
+          </DataTemplate>
+
+          <HierarchicalDataTemplate DataType="{x:Type toolWindows:TextErrorItemViewModel}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </HierarchicalDataTemplate>
+
+          <HierarchicalDataTemplate DataType="{x:Type toolWindows:TextWarningItemViewModel}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </HierarchicalDataTemplate>
+
+          <!-- Placeholder item used to show "Click here for more results" -->
+          <DataTemplate DataType="{x:Type toolWindows:LazyItemViewModel}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </DataTemplate>
+
+          <!-- Simple text string item -->
+          <HierarchicalDataTemplate DataType="{x:Type toolWindows:TextItemViewModel}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+              <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSourcePath}" />
+              <TextBlock Text="{Binding Text}" Style="{StaticResource DisplayTextStyle}" />
+            </StackPanel>
+          </HierarchicalDataTemplate>
+
+        </TreeView.Resources>
+      </TreeView>
+    </Grid>
   </DockPanel>
 </UserControl>
 
