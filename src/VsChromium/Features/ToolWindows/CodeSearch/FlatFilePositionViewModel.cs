@@ -61,7 +61,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     public int Length { get { return _matchPosition.Length; } }
 
-    public string Path { get { return Name; } }
+    public string Path { get { return GetFullPath(); } }
 
     /// <summary>
     /// Databound! Return text representing  of items (if children are present)
@@ -92,6 +92,8 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         return string.Format(" ({0} items)", ChildrenCount);
       }
     }
+
+    public bool HasMatchText { get { return _matchPosition != null; } }
 
     public string TextBeforeMatch {
       get {
