@@ -59,7 +59,6 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         TextChanged = text => { ViewModel.SearchFilePathsValue = text; },
         SearchFunction = RefreshSearchResults,
         PreviousElement = SearchCodeCombo,
-        NextElement = FileTreeView,
         InitialItems = {
           "*",
           "*.c;*.cpp;*.cxx;*.cc;*.tli;*.tlh;*.h;*.hh;*.hpp;*.hxx;*.hh;*.inl;*.rc;*.resx;*.idl;*.asm;*.inc",
@@ -71,6 +70,30 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           "*.*",
         }
       });
+
+      // Setup custom NextElement logic to account for swapping tree/list views
+      SearchFilePathsCombo.PrePreviewKeyDown += (s, e) => {
+        if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Down) {
+          if (!SearchFilePathsCombo.IsDropDownOpen) {
+            if (ViewModel.FlattenSearchResults) { 
+              FileListBox.Focus();
+
+              if(FileListBox.SelectedItem == null) {
+                FileListBox.SelectedIndex = 0;
+              }
+
+              var listBoxItem = (ListBoxItem)FileListBox.ItemContainerGenerator.ContainerFromItem(FileListBox.SelectedItem);
+              if(listBoxItem != null) { 
+                listBoxItem.Focus();
+              }
+            }
+            else {
+              FileTreeView.Focus();
+            }
+            e.Handled = true;
+          }
+        }
+      };
     }
 
     /// <summary>
