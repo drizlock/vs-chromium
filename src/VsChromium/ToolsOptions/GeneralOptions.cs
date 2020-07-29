@@ -155,6 +155,12 @@ namespace VsChromium.ToolsOptions {
     public bool SearchUseRegEx { get; set; }
 
     [Category(CodeSearchOptionsCategory)]
+    [DisplayName("Enable space as identifier wildcard")]
+    [Description("Space represents either a space or any number of identifier characters. Inactive in RegEx searches.")]
+    [DefaultValue(false)]
+    public bool SearchSpaceAsWildcard { get; set; }
+
+    [Category(CodeSearchOptionsCategory)]
     [DisplayName("Search through Symbolic Links")]
     [Description("Enable the \"Include Symbolic Links\" option at startup.")]
     [DefaultValue(true)]

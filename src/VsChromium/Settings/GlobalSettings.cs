@@ -16,6 +16,7 @@ namespace VsChromium.Settings {
     private bool _searchMatchCase;
     private bool _searchMatchWholeWord;
     private bool _searchUseRegEx;
+    private bool _searchSpaceAsWildcard;
     private bool _searchIncludeSymLinks;
     private bool _searchUnderstandBuildOutputPaths;
     private bool _codingStyleAccessorIndent;
@@ -170,6 +171,17 @@ namespace VsChromium.Settings {
 
         _searchUseRegEx = value;
         OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.SearchUseRegEx));
+      }
+    }
+
+    public bool SearchSpaceAsWildcard {
+      get { return _searchSpaceAsWildcard; }
+      set {
+        if (value == _searchSpaceAsWildcard)
+          return;
+
+        _searchSpaceAsWildcard = value;
+        OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.SearchSpaceAsWildcard));
       }
     }
 

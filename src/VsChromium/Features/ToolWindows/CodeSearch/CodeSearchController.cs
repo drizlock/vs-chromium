@@ -11,6 +11,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Controls;
 using VsChromium.Core.Configuration;
@@ -862,17 +864,50 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       });
     }
 
+    private string PreProcessSearchString(string searchPattern)
+    {
+      if(ViewModel.UseRegex) {
+        return searchPattern;
+      }
+
+      if(GlobalSettings.SearchSpaceAsWildcard) { 
+        string SpaceWildcard = "( |[A-Za-z0-9_:]*)";
+        string SpaceWildcardWholeWord = "( |[A-Za-z0-9_]*)";
+
+        StringBuilder searchPatternBuilder = new StringBuilder();
+        string[] searchTerms = searchPattern.Split(' ');
+        foreach(string searchTerm in searchTerms) {
+          if (searchTerm.Length == 0)
+            continue;
+
+          string escapedTerm = Regex.Escape(searchTerm);
+          escapedTerm = Regex.Replace(escapedTerm, @"(^|[^\\])\\\*", "$1.*");
+          escapedTerm = Regex.Replace(escapedTerm, @"\\\\\\*", "\\*");
+
+          if (searchPatternBuilder.Length == 0)
+            searchPatternBuilder.Append(escapedTerm);
+          else
+            searchPatternBuilder.AppendFormat("{0}{1}", ViewModel.MatchWholeWord ? SpaceWildcardWholeWord : SpaceWildcard, escapedTerm);
+        }
+        return searchPatternBuilder.ToString();
+
+      }
+
+      return searchPattern;
+    }
+
     private SearchCodeRequest CreateSearchCodeRequest(string searchPattern, string filePathPattern, int maxResults) {
-      return new SearchCodeRequest {
+      var processedSearchPattern = PreProcessSearchString(searchPattern);
+        return new SearchCodeRequest {
         SearchParams = new SearchParams {
-          SearchString = searchPattern,
+          SearchString = processedSearchPattern,
           FilePathPattern = filePathPattern,
           MaxResults = maxResults,
           MatchCase = ViewModel.MatchCase,
           MatchWholeWord = ViewModel.MatchWholeWord,
           IncludeSymLinks = ViewModel.IncludeSymLinks,
           UseRe2Engine = true,
-          Regex = ViewModel.UseRegex,
+          Regex = ViewModel.UseRegex || GlobalSettings.SearchSpaceAsWildcard,
         }
       };
     }
