@@ -376,6 +376,21 @@
       Background="{DynamicResource VsBrush.ToolWindowBackground}"
       Foreground="{DynamicResource VsBrush.WindowText}"
       PreviewKeyDown="ListBox_OnPreviewKeyDown">
+        <ListBox.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Open" Command="{Binding ListOpenCommand}" FontWeight="Bold" InputGestureText="Enter"/>
+            <MenuItem Header="Open With..." Command="{Binding ListOpenWithCommand}" />
+            <MenuItem Header="Show in Solution Explorer" Command="{Binding ListShowInSourceExplorerCommand}" />
+            <MenuItem Header="Open Containing Folder" Command="{Binding ListOpenContainingFolderCommand}" />
+            <Separator />
+            <MenuItem Header="Copy" Command="{Binding ListCopyCommand}" InputGestureText="Ctrl+C"/>
+            <MenuItem Header="Copy Full Path" Command="{Binding ListCopyFullPathCommand}" />
+            <MenuItem Header="Copy Relative Path" Command="{Binding ListCopyRelativePathCommand}" />
+            <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding ListCopyFullPathPosixCommand}" />
+            <MenuItem Header="Copy Relative Path  with &quot;/&quot;" Command="{Binding ListCopyRelativePathPosixCommand}" />
+          </ContextMenu>
+        </ListBox.ContextMenu>
+        
         <ListBox.ItemContainerStyle>
           <Style TargetType="ListBoxItem">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -411,20 +426,6 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
               </Grid.ColumnDefinitions>
-              <Grid.ContextMenu>
-                <ContextMenu>
-                  <MenuItem Header="Open" Command="{Binding OpenCommand}" FontWeight="Bold" />
-                  <MenuItem Header="Open With..." Command="{Binding OpenWithCommand}" />
-                  <MenuItem Header="Show in Solution Explorer" Command="{Binding ShowInSourceExplorerCommand}" />
-                  <MenuItem Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}" />
-                  <Separator />
-                  <MenuItem Header="Copy" Command="{Binding CopyCommand}"/>
-                  <MenuItem Header="Copy Full Path" Command="{Binding CopyFullPathCommand}" />
-                  <MenuItem Header="Copy Relative Path" Command="{Binding CopyRelativePathCommand}" />
-                  <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding CopyFullPathPosixCommand}" />
-                  <MenuItem Header="Copy Relative Path  with &quot;/&quot;" Command="{Binding CopyRelativePathPosixCommand}" />
-                </ContextMenu>
-              </Grid.ContextMenu>
               <TextBlock Grid.Column="0" Text="{Binding DisplayText}">
                 <TextBlock.Style>
                   <Style TargetType="TextBlock">

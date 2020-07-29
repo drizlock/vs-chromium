@@ -51,7 +51,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
             return string.Format("{0}{1}", GetFullPath(), LineColumnText);
         }
         
-        return string.Format("{0}({1}): {2}", GetFullPath(), _extractPosition.LineNumber + 1, _extractPosition.Text);
+        return string.Format("{0}({1}): {2}", GetFullPath(), _extractPosition.LineNumber + 1, _extractPosition.Text.TrimEnd(Environment.NewLine.ToArray()));
       }
     }
 
