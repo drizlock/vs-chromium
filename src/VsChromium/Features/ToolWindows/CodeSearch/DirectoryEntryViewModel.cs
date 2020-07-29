@@ -31,7 +31,8 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     private IList<TreeViewItemViewModel> CreateChildren() {
       return _directoryEntry
         .Entries
-        .Select(entry => Create(Controller, this, entry, _postCreate))
+        .Select(entry => Create(Controller, this, entry, _postCreate, false))
+        .SelectMany(x => x)
         .Cast<TreeViewItemViewModel>()
         .ToList();
     }

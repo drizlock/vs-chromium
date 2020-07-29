@@ -15,6 +15,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     private List<TreeViewItemViewModel> _searchCodeResultNodes = new List<TreeViewItemViewModel>();
     private List<TreeViewItemViewModel> _searchFilePathsResultNodes = new List<TreeViewItemViewModel>();
     private UpdateInfo _updateInfo;
+    private bool _flattenSearchResults;
     private bool _matchCase;
     private bool _matchWholeWord;
     private bool _useRegex;
@@ -80,6 +81,19 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         if (ReferenceEquals(ActiveRootNodes, _searchFilePathsResultNodes))
           return DisplayKind.SearchFilePathsResult;
         return DisplayKind.InformationMessages;
+      }
+    }
+
+    /// <summary>
+    /// Databound!
+    /// </summary>
+    public bool FlattenSearchResults {
+      get { return _flattenSearchResults; }
+      set {
+        if (_flattenSearchResults != value) {
+          _flattenSearchResults = value;
+          OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FlattenSearchResults));
+        }
       }
     }
 

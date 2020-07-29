@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -58,7 +59,6 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         TextChanged = text => { ViewModel.SearchFilePathsValue = text; },
         SearchFunction = RefreshSearchResults,
         PreviousElement = SearchCodeCombo,
-        NextElement = FileTreeView,
         InitialItems = {
           "*",
           "*.c;*.cpp;*.cxx;*.cc;*.tli;*.tlh;*.h;*.hh;*.hpp;*.hxx;*.hh;*.inl;*.rc;*.resx;*.idl;*.asm;*.inc",
@@ -70,6 +70,30 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           "*.*",
         }
       });
+
+      // Setup custom NextElement logic to account for swapping tree/list views
+      SearchFilePathsCombo.PrePreviewKeyDown += (s, e) => {
+        if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Down) {
+          if (!SearchFilePathsCombo.IsDropDownOpen) {
+            if (ViewModel.FlattenSearchResults) { 
+              FileListBox.Focus();
+
+              if(FileListBox.SelectedItem == null) {
+                FileListBox.SelectedIndex = 0;
+              }
+
+              var listBoxItem = (ListBoxItem)FileListBox.ItemContainerGenerator.ContainerFromItem(FileListBox.SelectedItem);
+              if(listBoxItem != null) { 
+                listBoxItem.Focus();
+              }
+            }
+            else {
+              FileTreeView.Focus();
+            }
+            e.Handled = true;
+          }
+        }
+      };
     }
 
     /// <summary>
@@ -196,6 +220,49 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     private void RefreshSearchResults(bool immediate) {
       Controller.PerformSearch(immediate);
+    }
+
+    private void ListBox_OnPreviewKeyDown(object sender, KeyEventArgs e) {
+      if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Return) {
+        foreach(var item in FileListBox.SelectedItems) {
+          e.Handled = Controller.ExecuteOpenCommandForItem(item as TreeViewItemViewModel) || e.Handled;
+        }
+      }
+
+      if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Up) {
+        // If topmost item is selected, move selection to bottom combo box
+        var item = FileListBox.SelectedItem as TreeViewItemViewModel;
+        if (item != null) {
+          var parent = item.ParentViewModel as RootTreeViewItemViewModel;
+          if (parent != null) {
+            if (item == parent.Children.FirstOrDefault()) {
+              SearchFilePathsCombo.Focus();
+              e.Handled = true;
+            }
+          }
+        }
+      }
+
+      if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.C) {
+        StringBuilder copyText = new StringBuilder("");
+        foreach(FlatFilePositionViewModel item in FileListBox.SelectedItems) {
+          copyText.Append(item.CopyText);
+        }
+        Controller.Clipboard.SetText(copyText.ToString());
+        e.Handled = true;
+      }
+    }
+
+    private void ListBoxItem_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {
+      var tvi = sender as ListBoxItem;
+      if (tvi == null)
+        return;
+
+      if (!tvi.IsSelected)
+        return;
+
+      if (Controller.ExecuteOpenCommandForItem(tvi.DataContext as TreeViewItemViewModel))
+        e.Handled = true;
     }
 
     private void TreeViewItem_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {

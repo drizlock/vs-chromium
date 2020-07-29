@@ -136,6 +136,12 @@ namespace VsChromium.ToolsOptions {
       }
     }
 
+    [Category(CodeSearchUserInterfaceCategory)]
+    [DisplayName("Flatten Results")]
+    [Description("Present the search results in a flat list instead of a tree.")]
+    [DefaultValue(false)]
+    public bool FlattenSearchResults { get; set; }
+
     [Category(CodeSearchOptionsCategory)]
     [DisplayName("Match case")]
     [Description("Enable the \"Match Case\" option at startup.")]

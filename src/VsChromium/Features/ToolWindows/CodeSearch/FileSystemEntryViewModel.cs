@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using VsChromium.Core.Files;
 using VsChromium.Core.Ipc.TypedMessages;
+using VsChromium.Core.Linq;
 
 namespace VsChromium.Features.ToolWindows.CodeSearch {
   public abstract class FileSystemEntryViewModel : CodeSearchItemViewModelBase {
@@ -25,31 +28,73 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       }
     }
 
-    public static FileSystemEntryViewModel Create(
+    public static IEnumerable<FileSystemEntryViewModel> Create(
       ICodeSearchController host,
       TreeViewItemViewModel parentViewModel,
-      FileSystemEntry fileSystemEntry, Action<FileSystemEntryViewModel> postCreate) {
+      FileSystemEntry fileSystemEntry,
+      Action<FileSystemEntryViewModel> postCreate,
+      bool flattenResults) {
       var fileEntry = fileSystemEntry as FileEntry;
       if (fileEntry != null) {
-        var result = new FileEntryViewModel(host, parentViewModel, fileEntry);
-        postCreate(result);
-        return result;
+        return CreateFileEntry(null, fileEntry, host, parentViewModel, fileSystemEntry, postCreate, flattenResults);
       }
       else {
-        var result = new DirectoryEntryViewModel(host, parentViewModel, (DirectoryEntry) fileSystemEntry, postCreate);
-        postCreate(result);
-        return result;
+        if (flattenResults) { 
+          var directoryEntry = fileSystemEntry as DirectoryEntry;
+          return directoryEntry
+            .Entries
+            .Select(entry => CreateFileEntry(directoryEntry, (FileEntry) entry, host, parentViewModel, fileSystemEntry, postCreate, flattenResults))
+            .SelectMany(x => x)
+            .ToList();
+        }
+        else { 
+          var result = new DirectoryEntryViewModel(host, parentViewModel, (DirectoryEntry) fileSystemEntry, postCreate);
+          postCreate(result);
+          return new[] { result };
+        }
       }
     }
 
-    public string GetFullPath() {
+    private static IEnumerable<FileSystemEntryViewModel> CreateFileEntry(
+      DirectoryEntry directoryEntry,
+      FileEntry fileEntry,
+      ICodeSearchController host,
+      TreeViewItemViewModel parentViewModel,
+      FileSystemEntry fileSystemEntry, 
+      Action<FileSystemEntryViewModel> postCreate,
+      bool flattenResults) {
+        if (flattenResults) {
+          var positionsData = fileEntry.Data as FilePositionsData;
+          if (positionsData != null) {
+            var flatFilePositions = positionsData
+              .Positions
+              .Select(x => new FlatFilePositionViewModel(host, parentViewModel, directoryEntry, fileEntry, x))
+              .ToList();
+            flatFilePositions.ForAll(postCreate);
+            FlatFilePositionViewModel.LoadFileExtracts(host, PathHelpers.CombinePaths(directoryEntry?.Name, fileEntry.Name), flatFilePositions);
+            return flatFilePositions;
+          }
+          else {
+            var result = new FlatFilePositionViewModel(host, parentViewModel, directoryEntry, fileEntry, null);
+            postCreate(result);
+            return new[] { result };
+          }
+        }
+        else { 
+          var result = new FileEntryViewModel(host, parentViewModel, fileEntry);
+          postCreate(result);
+          return new[] { result };
+        }
+    }
+
+    public virtual string GetFullPath() {
       var parent = ParentViewModel as FileSystemEntryViewModel;
       if (parent == null)
         return Name;
       return PathHelpers.CombinePaths(parent.GetFullPath(), Name);
     }
 
-    public string GetRelativePath() {
+    public virtual string GetRelativePath() {
       var parent = ParentViewModel as FileSystemEntryViewModel;
       if (parent == null)
         return "";

@@ -14,7 +14,7 @@ using VsChromium.Core.Utility;
 using VsChromium.Threads;
 
 namespace VsChromium.Features.ToolWindows.CodeSearch {
-  public class FileEntryViewModel : FileSystemEntryViewModel {
+  public class FileEntryViewModel : FileSystemEntryViewModel, IFileEntryViewModel {
     private readonly FileEntry _fileEntry;
     private readonly Lazy<IList<TreeViewItemViewModel>> _children;
     private int _lineNumber = -1;
