@@ -260,6 +260,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         e.Handled = true;
     }
 
+    private void ListBoxItem_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+      var tvi = sender as ListBoxItem;
+      if (tvi == null)
+        return;
+
+      var lazy = tvi.DataContext as LazyItemViewModel;
+      if (lazy != null) {
+        lazy.ExpandItems();
+        e.Handled = true;
+      }
+    }
+
     private void TreeViewItem_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {
       var tvi = sender as TreeViewItem;
       if (tvi == null)

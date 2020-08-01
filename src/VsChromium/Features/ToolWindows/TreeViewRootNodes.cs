@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-using System.Collections.ObjectModel;
+using System;
+using VsChromium.Wpf;
 
 namespace VsChromium.Features.ToolWindows {
-  public class TreeViewRootNodes<T> : ObservableCollection<T> {
+  public class TreeViewRootNodes<T> : LazyObservableCollection<T>  where T : class {
+    public TreeViewRootNodes(int lazyCount, Func<T> lazyItemFactory) : base(lazyCount, lazyItemFactory) {
+    }
   }
 }

@@ -547,6 +547,9 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           foreach (FlatFilePositionViewModel node in RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Reverse()) {
             node.OpenCommand.Execute(node);
           }
+          foreach (LazyItemViewModel node in RootNodes.Where(x => x.IsSelected).OfType<LazyItemViewModel>().Reverse()) {
+            node.ExpandItems();
+          }
         });
       }
     }
