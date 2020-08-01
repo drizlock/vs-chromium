@@ -14,6 +14,11 @@ namespace VsChromium.Features.ToolWindows {
 
     public string Text { get; set; }
     public event Action Selected;
+    public event Action Expand;
+
+    public void ExpandItems() {
+      Expand?.Invoke();
+    }
 
     protected virtual void OnSelected() {
       Action handler = Selected;

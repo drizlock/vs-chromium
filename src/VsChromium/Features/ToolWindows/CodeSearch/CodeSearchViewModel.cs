@@ -4,8 +4,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
+using VsChromium.Core.Files;
 using VsChromium.Core.Utility;
 using VsChromium.Features.AutoUpdate;
 
@@ -534,6 +537,119 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.GotoPreviousEnabled));
       OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.CancelSearchEnabled));
       OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.RefreshSearchResultsEnabled));
+    }
+
+    public ICommand ListOpenCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          foreach (FlatFilePositionViewModel node in RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Reverse()) {
+            node.OpenCommand.Execute(node);
+          }
+          foreach (LazyItemViewModel node in RootNodes.Where(x => x.IsSelected).OfType<LazyItemViewModel>().Reverse()) {
+            node.ExpandItems();
+          }
+        });
+      }
+    }
+
+    public ICommand ListOpenWithCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          foreach (FlatFilePositionViewModel node in RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Reverse()) {
+            node.OpenWithCommand.Execute(node);
+          }
+        });
+      }
+    }
+
+    public ICommand ListShowInSourceExplorerCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          foreach (FlatFilePositionViewModel node in RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Reverse())
+          {
+            node.ShowInSourceExplorerCommand.Execute(node);
+          }
+        });
+      }
+    }
+
+    public ICommand ListOpenContainingFolderCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          foreach (FlatFilePositionViewModel node in RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Reverse())
+          {
+            node.OpenContainingFolderCommand.Execute(node);
+          }
+        });
+      }
+    }
+
+    public ICommand ListCopyCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          ICodeSearchController Controller = RootNodes.OfType<FlatFilePositionViewModel>().FirstOrDefault()?.Controller;
+          if(Controller != null)
+            Controller.Clipboard.SetText(string.Join(Environment.NewLine, RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Select(x => x.CopyText)));
+        });
+      }
+    }
+
+    public ICommand ListCopyFullPathCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          ICodeSearchController Controller = RootNodes.OfType<FlatFilePositionViewModel>().FirstOrDefault()?.Controller;
+          if (Controller != null)
+            Controller.Clipboard.SetText(string.Join(Environment.NewLine, RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Select(x => x.GetFullPath())));
+        });
+      }
+    }
+
+    public ICommand ListCopyRelativePathCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          ICodeSearchController Controller = RootNodes.OfType<FlatFilePositionViewModel>().FirstOrDefault()?.Controller;
+          if (Controller != null)
+            Controller.Clipboard.SetText(string.Join(Environment.NewLine, RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Select(x => x.GetRelativePath())));
+        });
+      }
+    }
+
+    public ICommand ListCopyFullPathPosixCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          ICodeSearchController Controller = RootNodes.OfType<FlatFilePositionViewModel>().FirstOrDefault()?.Controller;
+          if (Controller != null)
+            Controller.Clipboard.SetText(string.Join(Environment.NewLine, RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Select(x => PathHelpers.ToPosix(x.GetFullPath()))));
+        });
+      }
+    }
+
+    public ICommand ListCopyRelativePathPosixCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          ICodeSearchController Controller = RootNodes.OfType<FlatFilePositionViewModel>().FirstOrDefault()?.Controller;
+          if (Controller != null)
+            Controller.Clipboard.SetText(string.Join(Environment.NewLine, RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Select(x => PathHelpers.ToPosix(x.GetRelativePath()))));
+        });
+      }
     }
   }
 }

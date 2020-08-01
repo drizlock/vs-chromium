@@ -6,9 +6,7 @@ using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows.Input;
-using System.Windows.Media;
 using VsChromium.Core.Files;
 using VsChromium.Core.Ipc.TypedMessages;
 using VsChromium.Core.Linq;
@@ -53,7 +51,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
             return string.Format("{0}{1}", GetFullPath(), LineColumnText);
         }
         
-        return string.Format("{0}({1}): {2}", GetFullPath(), _extractPosition.LineNumber + 1, _extractPosition.Text);
+        return string.Format("{0}({1}): {2}", GetFullPath(), _extractPosition.LineNumber + 1, _extractPosition.Text.TrimEnd(Environment.NewLine.ToArray()));
       }
     }
 

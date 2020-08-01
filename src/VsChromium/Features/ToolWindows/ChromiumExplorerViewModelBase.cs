@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using VsChromium.Core.Linq;
+using VsChromium.Settings;
 using VsChromium.Views;
 
 namespace VsChromium.Features.ToolWindows {
   public class ChromiumExplorerViewModelBase : INotifyPropertyChanged {
-    private readonly TreeViewRootNodes<TreeViewItemViewModel> _rootNodes = new TreeViewRootNodes<TreeViewItemViewModel>();
+    private readonly TreeViewRootNodes<TreeViewItemViewModel> _rootNodes;
     private List<TreeViewItemViewModel> _activeRootNodes;
 
     /// <summary>
@@ -26,6 +27,10 @@ namespace VsChromium.Features.ToolWindows {
 
     public event EventHandler RootNodesChanged;
 
+    public ChromiumExplorerViewModelBase() {
+      _rootNodes = new TreeViewRootNodes<TreeViewItemViewModel>(HardCodedSettings.MaxExpandedTreeViewItemCount, CreateLazyItemViewModel);
+    }
+
     protected void SetRootNodes(List<TreeViewItemViewModel> newRootNodes) {
       // Don't update if we are passed in the already active collection.
       if (object.ReferenceEquals(_activeRootNodes, newRootNodes))
@@ -35,9 +40,7 @@ namespace VsChromium.Features.ToolWindows {
       // Move the active root nodes into the observable collection so that
       // the TreeView is refreshed.
       _rootNodes.Clear();
-      foreach (var child in _activeRootNodes) {
-        _rootNodes.Add(child);
-      }
+      _activeRootNodes.ForAll(_rootNodes.Add);
 
       this.OnRootNodesChanged();
     }
@@ -51,6 +54,18 @@ namespace VsChromium.Features.ToolWindows {
       PropertyChangedEventHandler handler = PropertyChanged;
       if (handler != null)
         handler(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private LazyItemViewModel CreateLazyItemViewModel() {
+      var result = new LazyItemViewModel(null, null);
+      if (_activeRootNodes.Count > HardCodedSettings.MaxExpandedTreeViewItemCount)
+        result.Text = string.Format("(Click to expand {0:n0} additional items...)",
+                                    _activeRootNodes.Count - HardCodedSettings.MaxExpandedTreeViewItemCount);
+      result.Expand += () => {
+        var node = _rootNodes.ExpandLazyNode();
+        node.IsSelected = true;
+      };
+      return result;
     }
   }
 }

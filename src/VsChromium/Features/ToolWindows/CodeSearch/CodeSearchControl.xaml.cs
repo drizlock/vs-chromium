@@ -224,9 +224,8 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     private void ListBox_OnPreviewKeyDown(object sender, KeyEventArgs e) {
       if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Return) {
-        foreach(var item in FileListBox.SelectedItems) {
-          e.Handled = Controller.ExecuteOpenCommandForItem(item as TreeViewItemViewModel) || e.Handled;
-        }
+        ViewModel.ListOpenCommand.Execute(null);
+        e.Handled = true;
       }
 
       if (e.KeyboardDevice.Modifiers == ModifierKeys.None && e.Key == Key.Up) {
@@ -244,11 +243,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       }
 
       if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.C) {
-        StringBuilder copyText = new StringBuilder("");
-        foreach(FlatFilePositionViewModel item in FileListBox.SelectedItems) {
-          copyText.Append(item.CopyText);
-        }
-        Controller.Clipboard.SetText(copyText.ToString());
+        ViewModel.ListCopyCommand.Execute(null);
         e.Handled = true;
       }
     }
@@ -263,6 +258,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
       if (Controller.ExecuteOpenCommandForItem(tvi.DataContext as TreeViewItemViewModel))
         e.Handled = true;
+    }
+
+    private void ListBoxItem_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+      var tvi = sender as ListBoxItem;
+      if (tvi == null)
+        return;
+
+      var lazy = tvi.DataContext as LazyItemViewModel;
+      if (lazy != null) {
+        lazy.ExpandItems();
+        e.Handled = true;
+      }
     }
 
     private void TreeViewItem_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {
