@@ -723,9 +723,26 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         : null;
 
       if (result == null || result.LineNumber < 0) {
+        var processedSearchPattern = searchPattern;
+        if (!ViewModel.UseRegex && GlobalSettings.SearchSpaceAsWildcard)
+        {
+          StringBuilder searchPatternBuilder = new StringBuilder();
+          string[] searchTerms = searchPattern.Split(';');
+          foreach (string searchTerm in searchTerms) {
+            if (searchTerm.Length == 0)
+              continue;
+
+            if (searchPatternBuilder.Length == 0)
+              searchPatternBuilder.AppendFormat("*{0}*", searchTerm.Replace(" ", "*"));
+            else
+              searchPatternBuilder.AppendFormat(";*{0}*", searchTerm.Replace(" ", "*"));
+          }
+          processedSearchPattern = searchPatternBuilder.ToString();
+        }
+
         return new FilePathSearchInfo {
           RawSearchPattern = searchPattern,
-          SearchPattern = searchPattern,
+          SearchPattern = processedSearchPattern,
           LineNumber = -1,
           ColumnNumber = -1
         };
@@ -768,7 +785,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
             response.HitCount,
             response.TotalCount,
             stopwatch.Elapsed.TotalSeconds,
-            searchInfo.SearchPattern);
+            GlobalSettings.SearchSpaceAsWildcard ? searchInfo.RawSearchPattern : searchInfo.SearchPattern);
           if (searchInfo.LineNumber >= 0) {
             msg += ", Line " + (searchInfo.LineNumber + 1);
           }
