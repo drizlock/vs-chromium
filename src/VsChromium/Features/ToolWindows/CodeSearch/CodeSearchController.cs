@@ -441,6 +441,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       settings.SearchMatchWholeWord = model.MatchWholeWord;
       settings.SearchUseRegEx = model.UseRegex;
       settings.SearchIncludeSymLinks = model.IncludeSymLinks;
+      settings.FlattenSearchResults = model.FlattenSearchResults;
     }
 
     private void OnIndexingStateChanged() {
@@ -613,7 +614,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           fileEntry.SetLineColumn(searchInfo.LineNumber, searchInfo.ColumnNumber);
       };
       
-      var flattenResults = _globalSettingsProvider.GlobalSettings.FlattenSearchResults;
+      var flattenResults = ViewModel.FlattenSearchResults;
       var rootNode = new RootTreeViewItemViewModel(StandarImageSourceFactory);
       var result = Enumerable
         .Empty<TreeViewItemViewModel>()
@@ -631,7 +632,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         string description,
         string additionalWarning,
         bool expandAll) {
-      var flattenResults = _globalSettingsProvider.GlobalSettings.FlattenSearchResults;
+      var flattenResults = ViewModel.FlattenSearchResults;
       var rootNode = new RootTreeViewItemViewModel(StandarImageSourceFactory);
       var result = Enumerable
         .Empty<TreeViewItemViewModel>()

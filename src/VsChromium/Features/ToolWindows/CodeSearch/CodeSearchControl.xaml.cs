@@ -216,6 +216,10 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.UnderstandBuildOutputPaths))  {
         RefreshSearchResults(true);
       }
+      if (e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.FlattenSearchResults)) {
+        ViewModel.RootNodes.Clear();
+        RefreshSearchResults(true);
+      }
     }
 
     private void RefreshSearchResults(bool immediate) {

@@ -184,6 +184,12 @@
           </Button.Style>
         </Button>
         <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" />
+        <ToggleButton Style="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}" Content="Flat" IsChecked="{Binding FlattenSearchResults}" IsTabStop="False" Foreground="{DynamicResource VsBrush.WindowText}">
+          <ToggleButton.ToolTip>
+            <TextBlock Text="{Binding FlattenSearchResultsToolTip}"/>
+          </ToggleButton.ToolTip>
+        </ToggleButton>
+        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" />
       </StackPanel>
       <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
         <!-- The server info button -->
