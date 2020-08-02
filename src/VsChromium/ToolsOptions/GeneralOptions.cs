@@ -142,6 +142,12 @@ namespace VsChromium.ToolsOptions {
     [DefaultValue(false)]
     public bool FlattenSearchResults { get; set; }
 
+    [Category(CodeSearchUserInterfaceCategory)]
+    [DisplayName("Display Relative Path")]
+    [Description("In flattened results, display a shorter relative path instead of full path.")]
+    [DefaultValue(false)]
+    public bool DisplayRelativePath { get; set; }
+
     [Category(CodeSearchOptionsCategory)]
     [DisplayName("Match case")]
     [Description("Enable the \"Match Case\" option at startup.")]

@@ -38,10 +38,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     public override string DisplayText {
       get {
-        if (_extractPosition == null)
-          return PathHelpers.CombinePaths(_directoryEntry?.Name, _fileEntry.Name);
+        if(Controller.GlobalSettings.DisplayRelativePath) { 
+          if (_extractPosition == null)
+            return _fileEntry.Name;
 
-        return string.Format("{0}({1}): ", GetFullPath(), _extractPosition.LineNumber + 1);
+          return string.Format("{0}({1}): ", GetRelativePath(), _extractPosition.LineNumber + 1);
+        }
+        else { 
+          if (_extractPosition == null)
+            return PathHelpers.CombinePaths(_directoryEntry?.Name, _fileEntry.Name);
+
+          return string.Format("{0}({1}): ", GetFullPath(), _extractPosition.LineNumber + 1);
+        }
       }
     }
 
@@ -212,10 +220,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     }
 
     public override string GetRelativePath() {
-      if(_directoryEntry == null)
-        return "";
-
-      return _directoryEntry.Name;
+      return _fileEntry.Name;
     }
 
     public void SetLineColumn(int lineNumber, int columnNumber) {

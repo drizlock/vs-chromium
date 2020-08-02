@@ -14,6 +14,7 @@ namespace VsChromium.Settings {
     private int _searchCodeMaxResults;
     private int _autoSearchDelayMsec;
     private bool _flattenSearchResults;
+    private bool _displayRelativePath;
     private bool _searchMatchCase;
     private bool _searchMatchWholeWord;
     private bool _searchUseRegEx;
@@ -149,6 +150,17 @@ namespace VsChromium.Settings {
 
         _flattenSearchResults = value;
         OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FlattenSearchResults));
+      }
+    }
+
+    public bool DisplayRelativePath { 
+      get { return _displayRelativePath; }
+      set {
+        if (value == _displayRelativePath)
+          return;
+
+        _displayRelativePath = value;
+        OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.DisplayRelativePath));
       }
     }
 

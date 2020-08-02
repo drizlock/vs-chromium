@@ -421,6 +421,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     private void GlobalSettingsOnPropertyChanged(object sender, PropertyChangedEventArgs args) {
       var setting = _globalSettingsProvider.GlobalSettings;
       ViewModel.FlattenSearchResults = setting.FlattenSearchResults;
+      ViewModel.DisplayRelativePath = setting.DisplayRelativePath;
       ViewModel.MatchCase = setting.SearchMatchCase;
       ViewModel.MatchWholeWord = setting.SearchMatchWholeWord;
       ViewModel.UseRegex = setting.SearchUseRegEx;

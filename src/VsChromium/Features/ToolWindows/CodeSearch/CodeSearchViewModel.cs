@@ -19,6 +19,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     private List<TreeViewItemViewModel> _searchFilePathsResultNodes = new List<TreeViewItemViewModel>();
     private UpdateInfo _updateInfo;
     private bool _flattenSearchResults;
+    private bool _displayRelativePath;
     private bool _matchCase;
     private bool _matchWholeWord;
     private bool _useRegex;
@@ -84,6 +85,16 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         if (ReferenceEquals(ActiveRootNodes, _searchFilePathsResultNodes))
           return DisplayKind.SearchFilePathsResult;
         return DisplayKind.InformationMessages;
+      }
+    }
+    
+    public bool DisplayRelativePath {
+      get { return _displayRelativePath; }
+      set {
+        if (_displayRelativePath != value) {
+          _displayRelativePath = value;
+          OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.DisplayRelativePath));
+        }
       }
     }
 
