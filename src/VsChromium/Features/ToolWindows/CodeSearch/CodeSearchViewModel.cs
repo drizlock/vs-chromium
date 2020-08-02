@@ -104,6 +104,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     /// <summary>
     /// Databound!
     /// </summary>
+    public string FlattenSearchResultsToolTip {
+      get {
+        return string.Format(
+          "Toggle flat display of search results. " +
+          "Search results are currently displayed {0}.",
+          FlattenSearchResults ? "flat" : "as a tree");
+      }
+    }
+
+    /// <summary>
+    /// Databound!
+    /// </summary>
     public bool MatchCase {
       get { return _matchCase; }
       set {
