@@ -55,11 +55,20 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     public string CopyText { 
       get {
-        if (_extractPosition == null) {
-            return string.Format("{0}{1}", GetFullPath(), LineColumnText);
-        }
+        if(Controller.GlobalSettings.DisplayRelativePath) { 
+          if (_extractPosition == null) {
+              return string.Format("{0}{1}", GetRelativePath(), LineColumnText);
+          }
         
-        return string.Format("{0}({1}): {2}", GetFullPath(), _extractPosition.LineNumber + 1, _extractPosition.Text.TrimEnd(Environment.NewLine.ToArray()));
+          return string.Format("{0}({1}): {2}", GetRelativePath(), _extractPosition.LineNumber + 1, _extractPosition.Text.TrimEnd(Environment.NewLine.ToArray()));
+        }
+        else { 
+          if (_extractPosition == null) {
+              return string.Format("{0}{1}", GetFullPath(), LineColumnText);
+          }
+        
+          return string.Format("{0}({1}): {2}", GetFullPath(), _extractPosition.LineNumber + 1, _extractPosition.Text.TrimEnd(Environment.NewLine.ToArray()));
+        }
       }
     }
 
