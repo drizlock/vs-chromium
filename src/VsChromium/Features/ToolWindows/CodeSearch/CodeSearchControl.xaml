@@ -451,8 +451,7 @@
               <TextBlock Grid.Column="2" Text="{Binding ItemCountText}" Style="{StaticResource PathTextStyle}" FontStyle="Italic" />
               <TextBlock Grid.Column="3" Text="{Binding TextBeforeMatch}" Style="{StaticResource TextExtractTextStyle}" />
               <TextBlock Grid.Column="4" Text="{Binding MatchText}" Style="{StaticResource TextExtractTextStyle}" Name="MatchText"
-                       Foreground="{DynamicResource {x:Static theme:VsResources.SearchMatchHighlightForeground}}"
-                       Background="{DynamicResource {x:Static theme:VsResources.SearchMatchHighlightBackground}}" />
+                       Background="{DynamicResource {x:Static theme:VsResources.HighlightBackground}}" />
               <TextBlock Grid.Column="5" Text="{Binding TextAfterMatch}" Style="{StaticResource TextExtractTextStyle}"/>
             </Grid>
           </DataTemplate>

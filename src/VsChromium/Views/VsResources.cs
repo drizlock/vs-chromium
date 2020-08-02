@@ -58,6 +58,12 @@ namespace VsChromium.Views {
       }
     }
 
+    public static ThemeResourceKey HighlightBackground {
+      get {
+        return EnvironmentColors.ToolTipBorderBrushKey;
+      }
+    }
+
     public static ThemeResourceKey SelectedItemBackground {
       get { return EnvironmentColors.ToolTipBorderBrushKey; }
     }
