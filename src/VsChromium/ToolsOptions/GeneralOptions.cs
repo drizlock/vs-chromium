@@ -141,6 +141,12 @@ namespace VsChromium.ToolsOptions {
     [Description("Present the search results in a flat list instead of a tree.")]
     [DefaultValue(false)]
     public bool FlattenSearchResults { get; set; }
+    
+    [Category(CodeSearchUserInterfaceCategory)]
+    [DisplayName("Horizontal Search Layout")]
+    [Description("Layout search boxes next to eachother instead of vertically.")]
+    [DefaultValue(false)]
+    public bool SearchHorizontalLayout { get; set; }
 
     [Category(CodeSearchOptionsCategory)]
     [DisplayName("Match case")]

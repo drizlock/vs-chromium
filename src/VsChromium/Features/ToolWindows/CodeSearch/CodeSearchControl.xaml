@@ -194,6 +194,11 @@
             <TextBlock Text="{Binding FlattenSearchResultsToolTip}"/>
           </ToggleButton.ToolTip>
         </ToggleButton>
+        <ToggleButton Style="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}" Content="Horiz" IsChecked="{Binding HorizontalSearchLayout}" IsTabStop="False" Foreground="{DynamicResource VsBrush.WindowText}">
+          <ToggleButton.ToolTip>
+            <TextBlock Text="{Binding HorizontalSearchLayoutToolTip}"/>
+          </ToggleButton.ToolTip>
+        </ToggleButton>
         <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" />
       </StackPanel>
       <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
@@ -285,57 +290,62 @@
       </Border.Background>
 
       <StackPanel HorizontalAlignment="Stretch" Margin="4,4,4,0" Orientation="Vertical">
-        <Grid HorizontalAlignment="Stretch" Margin="0" IsEnabled="{Binding ServerIsRunning}" >
+        <!-- Search Boxes -->
+        <Grid HorizontalAlignment="Stretch">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="{Binding FileSearchColumnWidth}"/>
+          </Grid.ColumnDefinitions>
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="80" />
-            <ColumnDefinition Width="*" MinWidth="100" />
-            <ColumnDefinition Width="Auto"/>
-          </Grid.ColumnDefinitions>
-          <Grid.Style>
-            <Style TargetType="Grid">
-              <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                  <Setter Property="Opacity" Value="0.5" />
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </Grid.Style>
-          <!-- Row 0 -->
-          <TextBlock Grid.Row="0" Grid.Column="0" Text="Search Code:" VerticalAlignment="Center" />
-          <wpf:EditableComboBox Grid.Row="0" Grid.Column="1" x:Name="SearchCodeCombo">
-            <wpf:EditableComboBox.ToolTip>
-              <TextBlock>
-                Type text pattern to search for.
-                <LineBreak/>
-                For simple text searches, the pattern may include wildcard characters ('*'), e.g. 
-                &quot;sometext&quot;, &quot;some*text&quot;, &quot;some*other*text&quot;.
-                <LineBreak/>
-                For regular expression searches, the pattern is a regular expression.
-              </TextBlock>
-            </wpf:EditableComboBox.ToolTip>
-          </wpf:EditableComboBox>
-          <Button Grid.Row="0" Grid.Column="2" IsTabStop="False"
-                  HorizontalAlignment="Left"
-                  VerticalAlignment="Center"
-                  Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-                  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}"
-                  Background="Transparent"
-                  Click="ClearSearchCode_Click"
-                  FontFamily="Segoe UI Symbol" Content="&#xE10A;">
-            <Button.ToolTip>
-              <TextBlock Text="Clear text"/>
-            </Button.ToolTip>
-          </Button>
-          <!-- Row 1 -->
-          <TextBlock Grid.Row="1" Grid.Column="0" Text="File Paths:" VerticalAlignment="Center" Foreground="{DynamicResource VsBrush.WindowText}" />
-          <wpf:EditableComboBox Grid.Row="1" Grid.Column="1" x:Name="SearchFilePathsCombo">
-            <wpf:EditableComboBox.ToolTip>
-              <TextBlock>
+          
+          <!-- Code Search -->
+          <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="80"/>
+              <ColumnDefinition Width="*" MinWidth="100"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Search Code:" VerticalAlignment="Center" />
+            <wpf:EditableComboBox Grid.Row="0" Grid.Column="1" x:Name="SearchCodeCombo">
+              <wpf:EditableComboBox.ToolTip>
+                <TextBlock>
+                    Type text pattern to search for.
+                    <LineBreak/>
+                    For simple text searches, the pattern may include wildcard characters ('*'), e.g. 
+                    &quot;sometext&quot;, &quot;some*text&quot;, &quot;some*other*text&quot;.
+                    <LineBreak/>
+                    For regular expression searches, the pattern is a regular expression.
+                </TextBlock>
+              </wpf:EditableComboBox.ToolTip>
+            </wpf:EditableComboBox>
+            <Button Grid.Row="0" Grid.Column="2" IsTabStop="False"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Center"
+                      Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                      Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}"
+                      Background="Transparent"
+                      Click="ClearSearchCode_Click"
+                      FontFamily="Segoe UI Symbol" Content="&#xE10A;">
+              <Button.ToolTip>
+                <TextBlock Text="Clear text"/>
+              </Button.ToolTip>
+            </Button>
+          </Grid>
+          
+          <!-- File Search -->
+          <Grid Grid.Row="{Binding FileSearchRow}" Grid.Column="{Binding FileSearchColumn}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="80"/>
+              <ColumnDefinition Width="*" MinWidth="100"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="File Paths:" VerticalAlignment="Center" Foreground="{DynamicResource VsBrush.WindowText}" />
+            <wpf:EditableComboBox Grid.Row="0" Grid.Column="1" x:Name="SearchFilePathsCombo">
+              <wpf:EditableComboBox.ToolTip>
+                <TextBlock>
                 Type pattern(s) for filtering search results. To exclude files/paths, use
                 the &quot;-&quot; prefix. For multiple patterns, use the ';' separator. 
                 <LineBreak/>
@@ -344,10 +354,10 @@
                 For full path matches, type "glob" patterns using the supported
                 special characters '*', '**', '/' and '\'. For example, 
                 '*.txt', '**/foo.txt', '/src', 'foo/*', '*.txt;*.log'.
-              </TextBlock>
-            </wpf:EditableComboBox.ToolTip>
-          </wpf:EditableComboBox>
-          <Button Grid.Row="1" Grid.Column="2" IsTabStop="False"
+                </TextBlock>
+              </wpf:EditableComboBox.ToolTip>
+            </wpf:EditableComboBox>
+            <Button Grid.Row="0" Grid.Column="2" IsTabStop="False"
                   Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Center"
@@ -355,23 +365,22 @@
                   Background="Transparent"
                   Click="ClearFilePathsPattern_Click"
                   FontFamily="Segoe UI Symbol" Content="&#xE10A;">
-            <Button.ToolTip>
-              <TextBlock Text="Clear file paths"/>
-            </Button.ToolTip>
-          </Button>
+              <Button.ToolTip>
+                <TextBlock Text="Clear file paths"/>
+              </Button.ToolTip>
+            </Button>
+          </Grid>
+        </Grid>
 
-          <!-- Row 2 -->
-          <ProgressBar 
-            Grid.Row="2" 
+        <ProgressBar 
+            Grid.Row="1" 
             Grid.Column="0" 
-            Grid.ColumnSpan="3" 
             IsIndeterminate="False" 
             Height="4" 
             Name="ProgressBar" 
             BorderThickness="0" 
             Visibility="Hidden" 
             IsTabStop="False" Margin="-4,0" />
-        </Grid>
       </StackPanel>
     </Border>
 

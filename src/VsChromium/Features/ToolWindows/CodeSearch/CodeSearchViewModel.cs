@@ -25,6 +25,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     private bool _includeSymLinks;
     private bool _spaceAsWildcard;
     private bool _understandBuildOutputPaths;
+    private bool _horizontalSearchLayout;
     private string _indexStatusText;
     private string _indexingServerStateText;
     private string _searchCodeValue;
@@ -376,6 +377,32 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     }
 
     /// <summary>
+    /// Databound!
+    /// </summary>
+    public bool HorizontalSearchLayout {
+      get { return _horizontalSearchLayout; }
+      set {
+        _horizontalSearchLayout = value;
+        OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FileSearchRow));
+        OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FileSearchColumn));
+        OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FileSearchColumnWidth));
+      }
+    }
+
+    /// <summary>
+    /// Databound!
+    /// </summary>
+    public string HorizontalSearchLayoutToolTip
+    {
+      get {
+        return string.Format(
+          "Toggle putting the code and file search boxes on the same line. " +
+          "Search boxes are currently set to {0}.",
+          HorizontalSearchLayout ? "the same line" : "different lines");
+      }
+    }
+
+    /// <summary>
     /// Indicates if the server has entries in its file system tree, i.e. if
     /// there are known project roots.
     /// </summary>
@@ -426,6 +453,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         return !string.IsNullOrEmpty(SearchFilePathsValue) ||
           !string.IsNullOrEmpty(SearchCodeValue);
       }
+    }
+
+    public int FileSearchRow {
+      get { return HorizontalSearchLayout ? 0 : 1; }
+    }
+
+    public int FileSearchColumn {
+      get { return HorizontalSearchLayout ? 1 : 0; }
+    }
+
+    public GridLength FileSearchColumnWidth {
+      get { return HorizontalSearchLayout ? new GridLength(1, GridUnitType.Star) : new GridLength(0); }
     }
 
     #region ImageSource for UI

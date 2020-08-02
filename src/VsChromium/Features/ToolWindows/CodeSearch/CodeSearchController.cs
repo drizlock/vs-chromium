@@ -435,6 +435,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       ViewModel.DisplayFontSize = setting.DisplayFont.Size;
       ViewModel.PathFontFamily = setting.PathFont.FontFamily.Name;
       ViewModel.PathFontSize = setting.PathFont.Size;
+      ViewModel.HorizontalSearchLayout = setting.SearchHorizontalLayout;
     }
 
     private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs args) {
@@ -446,6 +447,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       settings.SearchIncludeSymLinks = model.IncludeSymLinks;
       settings.SearchSpaceAsWildcard = model.UseSpaceAsWildcard;
       settings.FlattenSearchResults = model.FlattenSearchResults;
+      settings.SearchHorizontalLayout = model.HorizontalSearchLayout;
     }
 
     private void OnIndexingStateChanged() {
