@@ -425,6 +425,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       ViewModel.DisplayFontSize = setting.DisplayFont.Size;
       ViewModel.PathFontFamily = setting.PathFont.FontFamily.Name;
       ViewModel.PathFontSize = setting.PathFont.Size;
+      ViewModel.HorizontalSearchLayout = setting.SearchHorizontalLayout;
     }
 
     private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs args) {

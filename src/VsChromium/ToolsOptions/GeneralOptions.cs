@@ -136,6 +136,12 @@ namespace VsChromium.ToolsOptions {
       }
     }
 
+    [Category(CodeSearchUserInterfaceCategory)]
+    [DisplayName("Horizontal Search Layout")]
+    [Description("Layout search boxes next to eachother instead of vertically.")]
+    [DefaultValue(false)]
+    public bool SearchHorizontalLayout { get; set; }
+
     [Category(CodeSearchOptionsCategory)]
     [DisplayName("Match case")]
     [Description("Enable the \"Match Case\" option at startup.")]

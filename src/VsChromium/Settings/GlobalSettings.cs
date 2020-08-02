@@ -19,6 +19,7 @@ namespace VsChromium.Settings {
     private bool _searchSpaceAsWildcard;
     private bool _searchIncludeSymLinks;
     private bool _searchUnderstandBuildOutputPaths;
+    private bool _searchHorizontalLayout;
     private bool _codingStyleAccessorIndent;
     private bool _codingStyleTrailingSpace;
     private bool _codingStyleTabCharacter;
@@ -204,6 +205,17 @@ namespace VsChromium.Settings {
 
         _searchUnderstandBuildOutputPaths = value;
         OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.SearchUnderstandBuildOutputPaths));
+      }
+    }
+
+    public bool SearchHorizontalLayout {
+      get { return _searchHorizontalLayout; }
+      set {
+        if (value == _searchHorizontalLayout)
+          return;
+
+        _searchHorizontalLayout = value;
+        OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.SearchHorizontalLayout));
       }
     }
 
