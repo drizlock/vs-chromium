@@ -183,6 +183,12 @@
           </Button.Style>
         </Button>
         <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" />
+        <ToggleButton Style="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}" Content="Horiz" IsChecked="{Binding HorizontalSearchLayout}" IsTabStop="False" Foreground="{DynamicResource VsBrush.WindowText}">
+          <ToggleButton.ToolTip>
+            <TextBlock Text="{Binding HorizontalSearchLayoutToolTip}"/>
+          </ToggleButton.ToolTip>
+        </ToggleButton>
+        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" />
       </StackPanel>
       <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
         <!-- The server info button -->

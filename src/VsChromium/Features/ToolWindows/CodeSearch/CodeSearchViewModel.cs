@@ -320,6 +320,9 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       }
     }
 
+    /// <summary>
+    /// Databound!
+    /// </summary>
     public bool HorizontalSearchLayout {
       get { return _horizontalSearchLayout; }
       set {
@@ -327,6 +330,19 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FileSearchRow));
         OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FileSearchColumn));
         OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.FileSearchColumnWidth));
+      }
+    }
+
+    /// <summary>
+    /// Databound!
+    /// </summary>
+    public string HorizontalSearchLayoutToolTip
+    {
+      get {
+        return string.Format(
+          "Toggle putting the code and file search boxes on the same line. " +
+          "Search boxes are currently set to {0}.",
+          HorizontalSearchLayout ? "the same line" : "different lines");
       }
     }
 

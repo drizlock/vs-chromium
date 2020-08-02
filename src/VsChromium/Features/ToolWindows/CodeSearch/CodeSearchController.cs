@@ -435,6 +435,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       settings.SearchMatchWholeWord = model.MatchWholeWord;
       settings.SearchUseRegEx = model.UseRegex;
       settings.SearchIncludeSymLinks = model.IncludeSymLinks;
+      settings.SearchHorizontalLayout = model.HorizontalSearchLayout;
     }
 
     private void OnIndexingStateChanged() {
