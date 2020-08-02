@@ -427,6 +427,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       ViewModel.MatchWholeWord = setting.SearchMatchWholeWord;
       ViewModel.UseRegex = setting.SearchUseRegEx;
       ViewModel.IncludeSymLinks = setting.SearchIncludeSymLinks;
+      ViewModel.UseSpaceAsWildcard = setting.SearchSpaceAsWildcard;
       ViewModel.UnderstandBuildOutputPaths = setting.SearchUnderstandBuildOutputPaths;
       ViewModel.TextExtractFontFamily = setting.TextExtractFont.FontFamily.Name;
       ViewModel.TextExtractFontSize = setting.TextExtractFont.Size;
@@ -443,6 +444,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       settings.SearchMatchWholeWord = model.MatchWholeWord;
       settings.SearchUseRegEx = model.UseRegex;
       settings.SearchIncludeSymLinks = model.IncludeSymLinks;
+      settings.SearchSpaceAsWildcard = model.UseSpaceAsWildcard;
     }
 
     private void OnIndexingStateChanged() {
@@ -728,29 +730,44 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       ViewModel.ServerStatusToolTipText = _showServerInfoService.GetIndexingServerStatusToolTipText(response);
     }
 
+    private string PreproccessFilePathSearchString(string searchPattern) { 
+      if (ViewModel.UseSpaceAsWildcard && searchPattern != null) {
+        StringBuilder searchPatternBuilder = new StringBuilder();
+        string[] searchTerms = searchPattern.Split(';');
+        foreach (string searchTerm in searchTerms) {
+          if (searchTerm.Length == 0)
+            continue;
+
+          if (searchPatternBuilder.Length > 0)
+            searchPatternBuilder.Append(";");
+
+          string[] subterms = searchTerm.Split(' ');
+          foreach (string subterm in subterms) {
+            if (subterm.Length == 0)
+              continue;
+
+            // Automatically adds * around terms separated by space (unless the term contains special characters already)
+            Match hasSpecialCharacters = Regex.Match(subterm, @".*[\\\/\*].*");
+            if (hasSpecialCharacters.Success)
+              searchPatternBuilder.Append(subterm);
+            else
+              searchPatternBuilder.AppendFormat("*{0}*", subterm);
+          }
+        }
+        return searchPatternBuilder.ToString();
+      }
+      else {
+        return searchPattern;
+      }
+    }
+
     private FilePathSearchInfo PreprocessFilePathSearchPattern(string searchPattern) {
       var result = _globalSettingsProvider.GlobalSettings.SearchUnderstandBuildOutputPaths
         ? _buildOutputParser.ParseFullOrRelativePath(searchPattern)
         : null;
 
       if (result == null || result.LineNumber < 0) {
-        var processedSearchPattern = searchPattern;
-        if (!ViewModel.UseRegex && GlobalSettings.SearchSpaceAsWildcard)
-        {
-          StringBuilder searchPatternBuilder = new StringBuilder();
-          string[] searchTerms = searchPattern.Split(';');
-          foreach (string searchTerm in searchTerms) {
-            if (searchTerm.Length == 0)
-              continue;
-
-            if (searchPatternBuilder.Length == 0)
-              searchPatternBuilder.AppendFormat("*{0}*", searchTerm.Replace(" ", "*"));
-            else
-              searchPatternBuilder.AppendFormat(";*{0}*", searchTerm.Replace(" ", "*"));
-          }
-          processedSearchPattern = searchPatternBuilder.ToString();
-        }
-
+        var processedSearchPattern = PreproccessFilePathSearchString(searchPattern);
         return new FilePathSearchInfo {
           RawSearchPattern = searchPattern,
           SearchPattern = processedSearchPattern,
@@ -796,7 +813,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
             response.HitCount,
             response.TotalCount,
             stopwatch.Elapsed.TotalSeconds,
-            GlobalSettings.SearchSpaceAsWildcard ? searchInfo.RawSearchPattern : searchInfo.SearchPattern);
+            ViewModel.UseSpaceAsWildcard ? searchInfo.RawSearchPattern : searchInfo.SearchPattern);
           if (searchInfo.LineNumber >= 0) {
             msg += ", Line " + (searchInfo.LineNumber + 1);
           }
@@ -892,13 +909,13 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       });
     }
 
-    private string PreProcessSearchString(string searchPattern)
+    private string PreprocessSearchString(string searchPattern)
     {
       if(ViewModel.UseRegex) {
         return searchPattern;
       }
 
-      if(GlobalSettings.SearchSpaceAsWildcard) { 
+      if(ViewModel.UseSpaceAsWildcard) { 
         string SpaceWildcard = "( |[A-Za-z0-9_:]*)";
         string SpaceWildcardWholeWord = "( |[A-Za-z0-9_]*)";
 
@@ -925,17 +942,19 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     }
 
     private SearchCodeRequest CreateSearchCodeRequest(string searchPattern, string filePathPattern, int maxResults) {
-      var processedSearchPattern = PreProcessSearchString(searchPattern);
-        return new SearchCodeRequest {
+      var processedSearchPattern = PreprocessSearchString(searchPattern);
+      var processedFilePathPattern = PreproccessFilePathSearchString(filePathPattern);
+
+      return new SearchCodeRequest {
         SearchParams = new SearchParams {
           SearchString = processedSearchPattern,
-          FilePathPattern = filePathPattern,
+          FilePathPattern = processedFilePathPattern,
           MaxResults = maxResults,
           MatchCase = ViewModel.MatchCase,
           MatchWholeWord = ViewModel.MatchWholeWord,
           IncludeSymLinks = ViewModel.IncludeSymLinks,
           UseRe2Engine = true,
-          Regex = ViewModel.UseRegex || GlobalSettings.SearchSpaceAsWildcard,
+          Regex = ViewModel.UseRegex || ViewModel.UseSpaceAsWildcard,
         }
       };
     }
