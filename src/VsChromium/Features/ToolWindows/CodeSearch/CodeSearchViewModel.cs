@@ -19,6 +19,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     private bool _matchWholeWord;
     private bool _useRegex;
     private bool _includeSymLinks;
+    private bool _spaceAsWildcard;
     private bool _understandBuildOutputPaths;
     private string _indexStatusText;
     private string _indexingServerStateText;
@@ -180,6 +181,32 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           "Toggle searching files inside symbolic links directories. " +
           "Symbolic links are currently {0} in search results.",
           IncludeSymLinks ? "included" : "excluded");
+      }
+    }
+
+    /// <summary>
+    /// Databound!
+    /// </summary>
+    public bool UseSpaceAsWildcard {
+      get { return _spaceAsWildcard; }
+      set {
+        if (_spaceAsWildcard != value) {
+          _spaceAsWildcard = value;
+          OnPropertyChanged(ReflectionUtils.GetPropertyName(this, x => x.UseSpaceAsWildcard));
+        }
+      }
+    }
+
+    /// <summary>
+    /// Databound!
+    /// </summary>
+    public string UseSpaceAsWildcardToolTip
+    {
+      get {
+        return string.Format(
+          "Toggle using space as a wildcard in code and file searches. " +
+          "Space is currently {0}a wildcard.",
+          UseSpaceAsWildcard ? "" : "not ");
       }
     }
 

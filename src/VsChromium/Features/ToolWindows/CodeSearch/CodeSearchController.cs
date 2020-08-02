@@ -418,6 +418,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       ViewModel.MatchWholeWord = setting.SearchMatchWholeWord;
       ViewModel.UseRegex = setting.SearchUseRegEx;
       ViewModel.IncludeSymLinks = setting.SearchIncludeSymLinks;
+      ViewModel.UseSpaceAsWildcard = setting.SearchSpaceAsWildcard;
       ViewModel.UnderstandBuildOutputPaths = setting.SearchUnderstandBuildOutputPaths;
       ViewModel.TextExtractFontFamily = setting.TextExtractFont.FontFamily.Name;
       ViewModel.TextExtractFontSize = setting.TextExtractFont.Size;
@@ -434,6 +435,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       settings.SearchMatchWholeWord = model.MatchWholeWord;
       settings.SearchUseRegEx = model.UseRegex;
       settings.SearchIncludeSymLinks = model.IncludeSymLinks;
+      settings.SearchSpaceAsWildcard = model.UseSpaceAsWildcard;
     }
 
     private void OnIndexingStateChanged() {
@@ -718,7 +720,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     }
 
     private string PreproccessFilePathSearchString(string searchPattern) { 
-      if (GlobalSettings.SearchSpaceAsWildcard && searchPattern != null) {
+      if (ViewModel.UseSpaceAsWildcard && searchPattern != null) {
         StringBuilder searchPatternBuilder = new StringBuilder();
         string[] searchTerms = searchPattern.Split(';');
         foreach (string searchTerm in searchTerms) {
@@ -800,7 +802,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
             response.HitCount,
             response.TotalCount,
             stopwatch.Elapsed.TotalSeconds,
-            GlobalSettings.SearchSpaceAsWildcard ? searchInfo.RawSearchPattern : searchInfo.SearchPattern);
+            ViewModel.UseSpaceAsWildcard ? searchInfo.RawSearchPattern : searchInfo.SearchPattern);
           if (searchInfo.LineNumber >= 0) {
             msg += ", Line " + (searchInfo.LineNumber + 1);
           }
@@ -902,7 +904,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         return searchPattern;
       }
 
-      if(GlobalSettings.SearchSpaceAsWildcard) { 
+      if(ViewModel.UseSpaceAsWildcard) { 
         string SpaceWildcard = "( |[A-Za-z0-9_:]*)";
         string SpaceWildcardWholeWord = "( |[A-Za-z0-9_]*)";
 
@@ -941,7 +943,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           MatchWholeWord = ViewModel.MatchWholeWord,
           IncludeSymLinks = ViewModel.IncludeSymLinks,
           UseRe2Engine = true,
-          Regex = ViewModel.UseRegex || GlobalSettings.SearchSpaceAsWildcard,
+          Regex = ViewModel.UseRegex || ViewModel.UseSpaceAsWildcard,
         }
       };
     }

@@ -116,6 +116,11 @@
             <TextBlock Text="{Binding IncludeSymLinksToolTip}"/>
           </ToggleButton.ToolTip>
         </ToggleButton>
+        <ToggleButton Style="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}" Content="Space" IsChecked="{Binding UseSpaceAsWildcard}" IsTabStop="False" Foreground="{DynamicResource VsBrush.WindowText}">
+          <ToggleButton.ToolTip>
+            <TextBlock Text="{Binding UseSpaceAsWildcardToolTip}"/>
+          </ToggleButton.ToolTip>
+        </ToggleButton>
         <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" />
         <Button IsTabStop="False" IsEnabled="{Binding GotoPreviousEnabled}"
                 Click="GotoPrevious_Click" Foreground="{DynamicResource VsBrush.WindowText}"
