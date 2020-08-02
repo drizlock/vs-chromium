@@ -214,7 +214,8 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.UseRegex) ||
           e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.IncludeSymLinks) ||
           e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.UnderstandBuildOutputPaths) ||
-          e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.UseSpaceAsWildcard))  {
+          e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.UseSpaceAsWildcard) ||
+          e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.DisplayRelativePath))  {
         RefreshSearchResults(true);
       }
       if (e.PropertyName == ReflectionUtils.GetPropertyName(ViewModel, x => x.FlattenSearchResults)) {
