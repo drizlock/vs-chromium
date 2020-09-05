@@ -704,17 +704,16 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         },
         OnThreadPoolReceive = () => {
           sw.Stop();
-          _progressBarTracker.Stop(progressId);
         },
         OnDispatchThreadSuccess = typedResponse => {
-          if (cancellationToken.IsCancellationRequested)
-            return;
-          workerParams.ProcessResponse(typedResponse, sw);
+          if (!cancellationToken.IsCancellationRequested)
+            workerParams.ProcessResponse(typedResponse, sw);
+          _progressBarTracker.Stop(progressId);
         },
         OnDispatchThreadError = errorResponse => {
-          if (cancellationToken.IsCancellationRequested)
-            return;
-          workerParams.ProcessError(errorResponse, sw);
+          if (!cancellationToken.IsCancellationRequested)
+            workerParams.ProcessError(errorResponse, sw);
+          _progressBarTracker.Stop(progressId);
         }
       };
 
