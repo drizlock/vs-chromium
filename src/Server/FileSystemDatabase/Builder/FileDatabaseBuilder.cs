@@ -286,7 +286,9 @@ namespace VsChromium.Server.FileSystemDatabase.Builder {
 
         foreach (var directory in directories.ToForeachEnum()) {
           foreach (var fileName in directory.Value.ChildFiles.ToForeachEnum()) {
-            files.Add(fileName, new ProjectFileData(directory.Key, fileName, null));
+            if (directory.Key.IsFileSearchable(fileName)) {
+              files.Add(fileName, new ProjectFileData(directory.Key, fileName, null));
+            }
           }
         }
 
