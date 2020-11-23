@@ -37,11 +37,18 @@ namespace VsChromium.Views {
 
     private static VsResourceKey _searchMatchHighlightBackground;
     public static VsResourceKey SearchMatchHighlightBackground {
-      get {
-        return _searchMatchHighlightBackground ??
-          (_searchMatchHighlightBackground = CreateKey(
-            () => SearchMatchHighlightBackground,
-            Color.FromRgb(0xfd, 0xfb, 0xac)));
+      get
+      {
+        if (_searchMatchHighlightBackground == null)
+        {
+          var svc = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(Microsoft.VisualStudio.Shell.Interop.SVsUIShell)) as Microsoft.VisualStudio.Shell.Interop.IVsUIShell5;
+          Color themedColor = VsColors.GetThemedWPFColor(svc, EnvironmentColors.SystemWindowTextBrushKey);
+          themedColor.A = 50;
+
+          _searchMatchHighlightBackground = CreateKey(() => SearchMatchHighlightBackground, themedColor);
+        }
+
+        return _searchMatchHighlightBackground;
       }
     }
 
@@ -49,18 +56,6 @@ namespace VsChromium.Views {
       get {
         // Some sort of light blue/teal, works in all themes.
         return EnvironmentColors.CommandBarMenuLinkTextHoverBrushKey;
-      }
-    }
-
-    public static ThemeResourceKey PathForeground {
-      get {
-        return EnvironmentColors.ToolTipHintTextBrushKey;
-      }
-    }
-
-    public static ThemeResourceKey HighlightBackground {
-      get {
-        return EnvironmentColors.ToolTipBorderBrushKey;
       }
     }
 

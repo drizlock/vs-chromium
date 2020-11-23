@@ -281,7 +281,7 @@
     </Grid>
 
     <!-- SEARCH AREA -->
-    <Border DockPanel.Dock="Top" BorderBrush="Gray" BorderThickness="1,1,1,1" >
+    <Border DockPanel.Dock="Top" BorderBrush="Gray" >
       <Border.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
           <GradientStop Color="#33000000" Offset="0" />
@@ -395,6 +395,7 @@
       VirtualizingStackPanel.VirtualizationMode="Recycling"
       Background="{DynamicResource VsBrush.ToolWindowBackground}"
       Foreground="{DynamicResource VsBrush.WindowText}"
+      BorderThickness="0"
       PreviewKeyDown="ListBox_OnPreviewKeyDown">
         <ListBox.ContextMenu>
           <ContextMenu>
@@ -443,30 +444,26 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
               </Grid.ColumnDefinitions>
-              <TextBlock Grid.Column="0" Text="{Binding DisplayText}">
+              <TextBlock Grid.Column="0" Text="{Binding DisplayText}" Opacity="0.7">
                 <TextBlock.Style>
                   <Style TargetType="TextBlock">
                     <Setter Property="FontFamily" Value="{Binding DataContext.PathFontFamily, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
                     <Setter Property="FontSize" Value="{Binding DataContext.PathFontSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"/>
-                    <Style.Triggers>
-                      <DataTrigger Binding="{Binding HasMatchText}" Value="True">
-                        <Setter Property="Foreground" Value="{DynamicResource {x:Static theme:VsResources.PathForeground}}" />
-                      </DataTrigger>
-                    </Style.Triggers>
                   </Style>
                 </TextBlock.Style>
               </TextBlock>
               <TextBlock Grid.Column="1" Text="{Binding LineColumnText}" Style="{StaticResource TextExtractTextStyle}"
                        Foreground="{DynamicResource {x:Static theme:VsResources.LineColumnForeground}}"  />
               <TextBlock Grid.Column="2" Text="{Binding ItemCountText}" Style="{StaticResource PathTextStyle}" FontStyle="Italic" />
-              <TextBlock Grid.Column="3" Text="{Binding TextBeforeMatch}" Style="{StaticResource TextExtractTextStyle}" />
-              <TextBlock Grid.Column="4" Text="{Binding MatchText}" Style="{StaticResource TextExtractTextStyle}" Name="MatchText"
-                       Background="{DynamicResource {x:Static theme:VsResources.HighlightBackground}}" />
-              <TextBlock Grid.Column="5" Text="{Binding TextAfterMatch}" Style="{StaticResource TextExtractTextStyle}"/>
+              <TextBlock Grid.Column="4" Text="{Binding TextBeforeMatch}" Style="{StaticResource TextExtractTextStyle}" />
+              <TextBlock Grid.Column="5" Text="{Binding MatchText}" Style="{StaticResource TextExtractTextStyle}" Name="MatchText"
+                       Background="{DynamicResource {x:Static theme:VsResources.SearchMatchHighlightBackground}}"/>
+              <TextBlock Grid.Column="6" Text="{Binding TextAfterMatch}" Style="{StaticResource TextExtractTextStyle}"/>
             </Grid>
           </DataTemplate>
 
@@ -512,7 +509,8 @@
         Background="{DynamicResource VsBrush.ToolWindowBackground}"
         Foreground="{DynamicResource VsBrush.WindowText}"
         PreviewKeyDown="FileTreeView_OnPreviewKeyDown"
-        PreviewMouseRightButtonDown="FileTreeView_PreviewMouseRightButtonDown">
+        PreviewMouseRightButtonDown="FileTreeView_PreviewMouseRightButtonDown"
+        BorderThickness="0">
 
         <TreeView.ItemContainerStyle>
 
