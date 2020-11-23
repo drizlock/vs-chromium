@@ -53,8 +53,9 @@ namespace VsChromium.Threads {
           var requestsToExecute = new List<DelayedOperation>();
           lock (_lock) {
             // TODO(rpaquay): Consider a more efficient way if this becomes a bottleneck
+            DateTime utcNow = _dateTimeProvider.UtcNow;
             for (var node = _requests.First; node != null; node = node.Next) {
-              if (node.Value.DateEnqeued + node.Value.DelayedOperation.Delay <= _dateTimeProvider.UtcNow) {
+              if (node.Value.DateEnqeued + node.Value.DelayedOperation.Delay <= utcNow) {
                 requestsToExecute.Add(node.Value.DelayedOperation);
                 _requests.Remove(node);
               }

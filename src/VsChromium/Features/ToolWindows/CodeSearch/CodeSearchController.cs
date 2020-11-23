@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Controls;
 using VsChromium.Core.Configuration;
+using VsChromium.Core.Files;
 using VsChromium.Core.Ipc;
 using VsChromium.Core.Ipc.TypedMessages;
 using VsChromium.Core.Linq;
@@ -128,6 +129,73 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
       fileSystemTreeSource.TreeReceived += FileSystemTreeSource_OnTreeReceived;
       fileSystemTreeSource.ErrorReceived += FileSystemTreeSource_OnErrorReceived;
+
+      new Thread(FlatResultsPendingLoadLoop) { IsBackground = true }.Start();
+    }
+
+
+
+
+    /*
+    private static IEnumerable<FileSystemEntryViewModel> CreateFileEntry(
+  DirectoryEntry directoryEntry,
+  FileEntry fileEntry,
+  ICodeSearchController host,
+  TreeViewItemViewModel parentViewModel,
+  FileSystemEntry fileSystemEntry,
+  Action<FileSystemEntryViewModel> postCreate,
+  bool flattenResults)
+    {
+      if (flattenResults)
+      {
+        var positionsData = fileEntry.Data as FilePositionsData;
+        if (positionsData != null)
+        {
+          var flatFilePositions = positionsData
+            .Positions
+            .Select(x => new FlatFilePositionViewModel(host, parentViewModel, directoryEntry, fileEntry, x))
+            .ToList();
+          flatFilePositions.ForAll(postCreate);
+          FlatFilePositionViewModel.LoadFileExtracts(host, PathHelpers.CombinePaths(directoryEntry?.Name, fileEntry.Name), flatFilePositions);
+          return flatFilePositions;
+        }
+        */
+
+
+
+
+
+    private void FlatResultsPendingLoadLoop()
+    {
+      try
+      {
+        while (true)
+        {
+          _flatResultsPendingLoadEvent.WaitOne();
+          bool moreToProcess = false;
+          lock (_flatResultsPendingLoadLock)
+          {
+            if (_flatResultsPendingLoad.Any())
+            {
+              var resultPendingLoad = _flatResultsPendingLoad.Dequeue();
+
+              FlatFilePositionViewModel.LoadFileExtracts(this, resultPendingLoad.Path, resultPendingLoad.FilePositions);
+
+              moreToProcess = _flatResultsPendingLoad.Any();
+            }
+          }
+
+          if (moreToProcess)
+          {
+            Thread.Sleep(TimeSpan.FromSeconds(0.1));
+            _flatResultsPendingLoadEvent.Set();
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        Logger.LogError(e, "Error in FlatResultsPendingLoadLoop.");
+      }
     }
 
     public CodeSearchViewModel ViewModel => _control.ViewModel;
@@ -608,6 +676,16 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       return result;
     }
 
+    private class FlatFileResultPendingLoad
+    {
+      public string Path { get; set; }
+      public IEnumerable<FlatFilePositionViewModel> FilePositions { get; set; } 
+    }
+
+    private Queue<FlatFileResultPendingLoad> _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>();
+    private object _flatResultsPendingLoadLock = new object();
+    private readonly AutoResetEvent _flatResultsPendingLoadEvent = new AutoResetEvent(false);
+
     private List<TreeViewItemViewModel> CreateSearchFilePathsResult(
       FilePathSearchInfo searchInfo,
       DirectoryEntry fileResults,
@@ -627,7 +705,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         .Empty<TreeViewItemViewModel>()
         .ConcatSingle(new TextItemViewModel(StandarImageSourceFactory, rootNode, description))
         .ConcatSingle(new TextWarningItemViewModel(StandarImageSourceFactory, rootNode, additionalWarning), () => !string.IsNullOrEmpty(additionalWarning))
-        .Concat(fileResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, setLineColumn, flattenResults)).SelectMany(x => x))
+        .Concat(fileResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, setLineColumn, flattenResults)).SelectMany(x => x).SelectMany(x => x))
         .ToList();
       result.ForAll(rootNode.AddChild);
       TreeViewItemViewModel.ExpandNodes(result, expandAll);
@@ -641,14 +719,32 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         bool expandAll) {
       var flattenResults = ViewModel.FlattenSearchResults;
       var rootNode = new RootTreeViewItemViewModel(StandarImageSourceFactory);
+      var fileSystemEntryCollections = searchResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, _ => { }, flattenResults)).ToList();
       var result = Enumerable
         .Empty<TreeViewItemViewModel>()
         .ConcatSingle(new TextItemViewModel(StandarImageSourceFactory, rootNode, description))
         .ConcatSingle(new TextWarningItemViewModel(StandarImageSourceFactory, rootNode, additionalWarning), () => !string.IsNullOrEmpty(additionalWarning))
-        .Concat(searchResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, _ => { }, flattenResults)).SelectMany(x => x))
+        .Concat(fileSystemEntryCollections.SelectMany(x => x).SelectMany(x => x))
         .ToList();
       result.ForAll(rootNode.AddChild);
       TreeViewItemViewModel.ExpandNodes(result, expandAll);
+
+      if (flattenResults)
+      {
+        lock (_flatResultsPendingLoadLock)
+        {
+          _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>(
+            fileSystemEntryCollections.Single().Select(
+              entryCollection => new FlatFileResultPendingLoad
+              {
+                Path = entryCollection.First().GetFullPath(),
+                FilePositions = entryCollection.Cast<FlatFilePositionViewModel>()
+              }));
+
+          _flatResultsPendingLoadEvent.Set();
+        }
+      }
+
       return result;
     }
 
