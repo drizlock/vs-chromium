@@ -8,6 +8,7 @@ namespace VsChromium.Settings {
     public static int MaxExpandedTreeViewItemCount = 100;
     public static int LowHitCountWarrantingAdditionalSearch = 100;
 
-    public static int FlatResultsMinEntriesToLoadImmediately = 50;
+    public static int FlatResultsMaxImmediateRequests = 40;
+    public static int FlatResultsRequestsPerSecond = 20;
   }
 }

@@ -70,7 +70,6 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
               .Select(x => new FlatFilePositionViewModel(host, parentViewModel, directoryEntry, fileEntry, x))
               .ToList();
             flatFilePositions.ForAll(postCreate);
-            //FlatFilePositionViewModel.LoadFileExtracts(host, PathHelpers.CombinePaths(directoryEntry?.Name, fileEntry.Name), flatFilePositions);
             return flatFilePositions;
           }
           else {
