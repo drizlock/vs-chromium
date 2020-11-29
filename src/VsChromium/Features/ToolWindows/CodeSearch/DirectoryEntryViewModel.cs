@@ -33,6 +33,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         .Entries
         .Select(entry => Create(Controller, this, entry, _postCreate, false))
         .SelectMany(x => x)
+        .SelectMany(x => x)
         .Cast<TreeViewItemViewModel>()
         .ToList();
     }
