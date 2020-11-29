@@ -673,13 +673,20 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       {
         lock (_flatResultsPendingLoadLock)
         {
-          _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>(
+          if (fileSystemEntryCollections.Any())
+          {
+            _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>(
             fileSystemEntryCollections.Single().Select(
               entryCollection => new FlatFileResultPendingLoad
               {
                 Path = entryCollection.First().GetFullPath(),
                 FilePositions = entryCollection.Cast<FlatFilePositionViewModel>()
               }));
+          }
+          else
+          {
+            _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>();
+          }
 
           _flatResultsPendingLoadReinitialized = true;
           _flatResultsPendingLoadEvent.Set();
