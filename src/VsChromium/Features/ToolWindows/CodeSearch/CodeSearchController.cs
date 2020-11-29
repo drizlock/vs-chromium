@@ -1155,7 +1155,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           {
             var numberToProcess = Math.Min(
               _flatResultsPendingLoadReinitialized
-                ? HardCodedSettings.FlatResultsMaxImmediateRequests
+                ? _globalSettingsProvider.GlobalSettings.FlatResultsMaxImmediateRequests
                 : 1,
               _flatResultsPendingLoad.Count);
 
@@ -1173,7 +1173,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
           if (moreToProcess)
           {
-            int flatResultsRequestsPerSecond = Math.Max(HardCodedSettings.FlatResultsRequestsPerSecond, 1);
+            int flatResultsRequestsPerSecond = Math.Max(_globalSettingsProvider.GlobalSettings.FlatResultsRequestsPerSecond, 1);
 
             Thread.Sleep(TimeSpan.FromSeconds(1.0 / flatResultsRequestsPerSecond));
             _flatResultsPendingLoadEvent.Set();

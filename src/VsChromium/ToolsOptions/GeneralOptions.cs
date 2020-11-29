@@ -141,7 +141,19 @@ namespace VsChromium.ToolsOptions {
     [Description("Present the search results in a flat list instead of a tree.")]
     [DefaultValue(false)]
     public bool FlattenSearchResults { get; set; }
-    
+
+    [Category(CodeSearchUserInterfaceCategory)]
+    [DisplayName("Flat Results Max Immediate Requests")]
+    [Description("The max number of requests for the flat list to immediately issue to populate its results.")]
+    [DefaultValue(40)]
+    public int FlatResultsMaxImmediateRequests { get; set; }
+
+    [Category(CodeSearchUserInterfaceCategory)]
+    [DisplayName("Flat Results Requests Per Second")]
+    [Description("The requests per second to issue for the flat list to to populate its results.")]
+    [DefaultValue(20)]
+    public int FlatResultsRequestsPerSecond { get; set; }
+
     [Category(CodeSearchUserInterfaceCategory)]
     [DisplayName("Horizontal Search Layout")]
     [Description("Layout search boxes next to eachother instead of vertically.")]
