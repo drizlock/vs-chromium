@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Controls;
 using VsChromium.Core.Configuration;
+using VsChromium.Core.Files;
 using VsChromium.Core.Ipc;
 using VsChromium.Core.Ipc.TypedMessages;
 using VsChromium.Core.Linq;
@@ -39,6 +40,12 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       public const string FilesLoading = "files-loading";
       public const string SearchCode = "files-contents-search";
       public const string SearchFilePaths = "file-names-search";
+    }
+
+    private class FlatFileResultPendingLoad
+    {
+      public string Path { get; set; }
+      public IEnumerable<FlatFilePositionViewModel> FilePositions { get; set; }
     }
 
     private readonly CodeSearchControl _control;
@@ -70,6 +77,11 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     /// For generating unique id n progress bar tracker.
     /// </summary>
     private int _operationSequenceId;
+
+    private Queue<FlatFileResultPendingLoad> _flatResultsPendingLoad;
+    private bool _flatResultsPendingLoadReinitialized;
+    private readonly object _flatResultsPendingLoadLock;
+    private readonly AutoResetEvent _flatResultsPendingLoadEvent;
 
     public CodeSearchController(
       CodeSearchControl control,
@@ -109,6 +121,10 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         textDocumentTable);
       _taskCancellation = new TaskCancellation();
 
+      _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>();
+      _flatResultsPendingLoadLock = new object();
+      _flatResultsPendingLoadEvent = new AutoResetEvent(false);
+
       // Ensure initial values are in sync.
       GlobalSettingsOnPropertyChanged(null, null);
 
@@ -128,6 +144,8 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
       fileSystemTreeSource.TreeReceived += FileSystemTreeSource_OnTreeReceived;
       fileSystemTreeSource.ErrorReceived += FileSystemTreeSource_OnErrorReceived;
+
+      new Thread(FlatResultsPendingLoadLoop) { IsBackground = true }.Start();
     }
 
     public CodeSearchViewModel ViewModel => _control.ViewModel;
@@ -627,7 +645,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         .Empty<TreeViewItemViewModel>()
         .ConcatSingle(new TextItemViewModel(StandarImageSourceFactory, rootNode, description))
         .ConcatSingle(new TextWarningItemViewModel(StandarImageSourceFactory, rootNode, additionalWarning), () => !string.IsNullOrEmpty(additionalWarning))
-        .Concat(fileResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, setLineColumn, flattenResults)).SelectMany(x => x))
+        .Concat(fileResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, setLineColumn, flattenResults)).SelectMany(x => x).SelectMany(x => x))
         .ToList();
       result.ForAll(rootNode.AddChild);
       TreeViewItemViewModel.ExpandNodes(result, expandAll);
@@ -641,14 +659,40 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         bool expandAll) {
       var flattenResults = ViewModel.FlattenSearchResults;
       var rootNode = new RootTreeViewItemViewModel(StandarImageSourceFactory);
+      var fileSystemEntryCollections = searchResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, _ => { }, flattenResults)).ToList();
       var result = Enumerable
         .Empty<TreeViewItemViewModel>()
         .ConcatSingle(new TextItemViewModel(StandarImageSourceFactory, rootNode, description))
         .ConcatSingle(new TextWarningItemViewModel(StandarImageSourceFactory, rootNode, additionalWarning), () => !string.IsNullOrEmpty(additionalWarning))
-        .Concat(searchResults.Entries.Select(x => FileSystemEntryViewModel.Create(this, rootNode, x, _ => { }, flattenResults)).SelectMany(x => x))
+        .Concat(fileSystemEntryCollections.SelectMany(x => x).SelectMany(x => x))
         .ToList();
       result.ForAll(rootNode.AddChild);
       TreeViewItemViewModel.ExpandNodes(result, expandAll);
+
+      if (flattenResults)
+      {
+        lock (_flatResultsPendingLoadLock)
+        {
+          if (fileSystemEntryCollections.Any())
+          {
+            _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>(
+            fileSystemEntryCollections.Single().Select(
+              entryCollection => new FlatFileResultPendingLoad
+              {
+                Path = entryCollection.First().GetFullPath(),
+                FilePositions = entryCollection.Cast<FlatFilePositionViewModel>()
+              }));
+          }
+          else
+          {
+            _flatResultsPendingLoad = new Queue<FlatFileResultPendingLoad>();
+          }
+
+          _flatResultsPendingLoadReinitialized = true;
+          _flatResultsPendingLoadEvent.Set();
+        }
+      }
+
       return result;
     }
 
@@ -1096,6 +1140,49 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           }
           Logger.LogInfo("Search engine is done loading file database on server.");
         });
+      }
+    }
+
+    private void FlatResultsPendingLoadLoop()
+    {
+      try
+      {
+        while (true)
+        {
+          _flatResultsPendingLoadEvent.WaitOne();
+          bool moreToProcess;
+          lock (_flatResultsPendingLoadLock)
+          {
+            var numberToProcess = Math.Min(
+              _flatResultsPendingLoadReinitialized
+                ? _globalSettingsProvider.GlobalSettings.FlatResultsMaxImmediateRequests
+                : 1,
+              _flatResultsPendingLoad.Count);
+
+            moreToProcess = numberToProcess < _flatResultsPendingLoad.Count;
+
+            _flatResultsPendingLoadReinitialized = false;
+
+            for (int i = 0; i < numberToProcess; ++i)
+            {
+              var resultPendingLoad = _flatResultsPendingLoad.Dequeue();
+
+              FlatFilePositionViewModel.LoadFileExtracts(this, resultPendingLoad.Path, resultPendingLoad.FilePositions);
+            }
+          }
+
+          if (moreToProcess)
+          {
+            int flatResultsRequestsPerSecond = Math.Max(_globalSettingsProvider.GlobalSettings.FlatResultsRequestsPerSecond, 1);
+
+            Thread.Sleep(TimeSpan.FromSeconds(1.0 / flatResultsRequestsPerSecond));
+            _flatResultsPendingLoadEvent.Set();
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        Logger.LogError(e, "Error in FlatResultsPendingLoadLoop.");
       }
     }
   }

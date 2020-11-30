@@ -28,7 +28,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       }
     }
 
-    public static IEnumerable<FileSystemEntryViewModel> Create(
+    public static IEnumerable<IEnumerable<FileSystemEntryViewModel>> Create(
       ICodeSearchController host,
       TreeViewItemViewModel parentViewModel,
       FileSystemEntry fileSystemEntry,
@@ -36,7 +36,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       bool flattenResults) {
       var fileEntry = fileSystemEntry as FileEntry;
       if (fileEntry != null) {
-        return CreateFileEntry(null, fileEntry, host, parentViewModel, fileSystemEntry, postCreate, flattenResults);
+        return new[] { CreateFileEntry(null, fileEntry, host, parentViewModel, fileSystemEntry, postCreate, flattenResults) };
       }
       else {
         if (flattenResults) { 
@@ -44,13 +44,12 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           return directoryEntry
             .Entries
             .Select(entry => CreateFileEntry(directoryEntry, (FileEntry) entry, host, parentViewModel, fileSystemEntry, postCreate, flattenResults))
-            .SelectMany(x => x)
             .ToList();
         }
         else { 
           var result = new DirectoryEntryViewModel(host, parentViewModel, (DirectoryEntry) fileSystemEntry, postCreate);
           postCreate(result);
-          return new[] { result };
+          return new[] { new[] { result } };
         }
       }
     }
@@ -71,7 +70,6 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
               .Select(x => new FlatFilePositionViewModel(host, parentViewModel, directoryEntry, fileEntry, x))
               .ToList();
             flatFilePositions.ForAll(postCreate);
-            FlatFilePositionViewModel.LoadFileExtracts(host, PathHelpers.CombinePaths(directoryEntry?.Name, fileEntry.Name), flatFilePositions);
             return flatFilePositions;
           }
           else {
