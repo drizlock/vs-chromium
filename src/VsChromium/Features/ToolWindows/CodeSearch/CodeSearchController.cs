@@ -72,6 +72,15 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     private long _currentFileSystemTreeVersion = -1;
     private bool _performSearchOnNextRefresh;
+    
+    enum SearchType
+    {
+      Invalid,
+      Code,
+      Files
+    }
+    private SearchType _performSearchOnLoad = SearchType.Invalid;
+    private string _cachedSearchPattern = null;
 
     /// <summary>
     /// For generating unique id n progress bar tracker.
@@ -196,6 +205,8 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     public void QuickSearchCode(string searchPattern) {
       if (!ViewModel.ServerIsRunning) {
+        _performSearchOnLoad = SearchType.Code;
+        _cachedSearchPattern = searchPattern;
         return;
       }
       if (!string.IsNullOrEmpty(searchPattern)) {
@@ -208,6 +219,8 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     public void QuickFilePaths(string searchPattern) {
       if (!ViewModel.ServerIsRunning) {
+        _performSearchOnLoad = SearchType.Files;
+        _cachedSearchPattern = searchPattern;
         return;
       }
       //ExplorerControl.SearchCodeCombo.Text = "";
@@ -491,6 +504,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
     }
 
     private void OnFileSystemTreeScanSuccess(FileSystemTree tree) {
+      switch (_performSearchOnLoad)
+      {
+        case SearchType.Files:
+          QuickFilePaths(_cachedSearchPattern);
+          _performSearchOnLoad = SearchType.Invalid;
+          return;
+        case SearchType.Code:
+          QuickSearchCode(_cachedSearchPattern);
+          _performSearchOnLoad = SearchType.Invalid;
+          return;
+      }
+
       ViewModel.FileSystemTreeAvailable = (tree.Projects.Count > 0);
       _currentFileSystemTreeVersion = tree.Version;
 
