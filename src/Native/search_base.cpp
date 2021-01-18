@@ -23,18 +23,22 @@ bool IsWordCharacter(char ch) {
 bool IsWholeWordMatch(AsciiSearchBase::SearchParams* searchParams) {
   const char* start = searchParams->MatchStart - 1;
   char startCh = 0;
+  char startMatchCh = 0;
   if (start >= searchParams->TextStart) {
     startCh = *(searchParams->MatchStart -1);
+	startMatchCh = *(searchParams->MatchStart);
   }
-  if (IsWordCharacter(startCh))
+  if (IsWordCharacter(startCh) && IsWordCharacter(startMatchCh))
     return false;
 
   const char* end = searchParams->MatchStart + searchParams->MatchLength;
   char endCh = 0;
+  char endMatchCh = 0;
   if (end < searchParams->TextStart + searchParams->TextLength) {
     endCh = *end;
+	endMatchCh = *(end - 1);
   }
-  if (IsWordCharacter(endCh))
+  if (IsWordCharacter(endCh) && IsWordCharacter(endMatchCh))
     return false;
 
   return true;
