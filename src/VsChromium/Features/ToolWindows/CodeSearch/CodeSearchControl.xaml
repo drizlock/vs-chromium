@@ -405,6 +405,7 @@
             <MenuItem Header="Open Containing Folder" Command="{Binding ListOpenContainingFolderCommand}" />
             <Separator />
             <MenuItem Header="Copy" Command="{Binding ListCopyCommand}" InputGestureText="Ctrl+C"/>
+            <MenuItem Header="Copy Text" Command="{Binding ListCopyTextCommand}" />
             <MenuItem Header="Copy Full Path" Command="{Binding ListCopyFullPathCommand}" />
             <MenuItem Header="Copy Relative Path" Command="{Binding ListCopyRelativePathCommand}" />
             <MenuItem Header="Copy Full Path with &quot;/&quot;" Command="{Binding ListCopyFullPathPosixCommand}" />

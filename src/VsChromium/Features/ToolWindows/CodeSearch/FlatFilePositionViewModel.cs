@@ -53,7 +53,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
       }
     }
 
-    public string CopyText { 
+    public string CopyPathAndText { 
       get {
         if(Controller.GlobalSettings.DisplayRelativePath) { 
           if (_extractPosition == null) {
@@ -68,6 +68,25 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
           }
         
           return string.Format("{0}({1}): {2}", GetFullPath(), _extractPosition.LineNumber + 1, _extractPosition.Text.TrimEnd(Environment.NewLine.ToArray()));
+        }
+      }
+    }
+
+    public string CopyText { 
+      get {
+        if(Controller.GlobalSettings.DisplayRelativePath) { 
+          if (_extractPosition == null) {
+              return string.Format("{0}{1}", GetRelativePath(), LineColumnText);
+          }
+        
+          return string.Format("{0}", _extractPosition.Text.Trim(Environment.NewLine.ToArray()));
+        }
+        else { 
+          if (_extractPosition == null) {
+              return string.Format("{0}{1}", GetFullPath(), LineColumnText);
+          }
+        
+          return string.Format("{0}", _extractPosition.Text.TrimEnd(Environment.NewLine.ToArray()));
         }
       }
     }
@@ -180,7 +199,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     public ICommand CopyCommand {
       get {
-        return CommandDelegate.Create(sender => Controller.Clipboard.SetText(CopyText));
+        return CommandDelegate.Create(sender => Controller.Clipboard.SetText(CopyPathAndText));
       }
     }
 

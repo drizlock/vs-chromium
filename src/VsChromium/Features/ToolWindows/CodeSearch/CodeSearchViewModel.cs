@@ -688,6 +688,18 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         return CommandDelegate.Create(sender => {
           ICodeSearchController Controller = RootNodes.OfType<FlatFilePositionViewModel>().FirstOrDefault()?.Controller;
           if(Controller != null)
+            Controller.Clipboard.SetText(string.Join(Environment.NewLine, RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Select(x => x.CopyPathAndText)));
+        });
+      }
+    }
+
+    public ICommand ListCopyTextCommand
+    {
+      get
+      {
+        return CommandDelegate.Create(sender => {
+          ICodeSearchController Controller = RootNodes.OfType<FlatFilePositionViewModel>().FirstOrDefault()?.Controller;
+          if (Controller != null)
             Controller.Clipboard.SetText(string.Join(Environment.NewLine, RootNodes.Where(x => x.IsSelected).OfType<FlatFilePositionViewModel>().Select(x => x.CopyText)));
         });
       }
