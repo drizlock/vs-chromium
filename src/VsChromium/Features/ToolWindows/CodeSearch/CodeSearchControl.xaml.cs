@@ -253,6 +253,15 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
         e.Handled = true;
       }
     }
+        
+    private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        foreach (var removedItem in e.RemovedItems.Cast<TreeViewItemViewModel>()) {
+            removedItem.IsSelected = false;
+        }
+        foreach (var addedItem in e.AddedItems.Cast<TreeViewItemViewModel>()) {
+            addedItem.IsSelected = true;
+        }
+    }
 
     private void ListBoxItem_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {
       var tvi = sender as ListBoxItem;

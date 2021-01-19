@@ -396,7 +396,8 @@
       Background="{DynamicResource VsBrush.ToolWindowBackground}"
       Foreground="{DynamicResource VsBrush.WindowText}"
       BorderThickness="0"
-      PreviewKeyDown="ListBox_OnPreviewKeyDown">
+      PreviewKeyDown="ListBox_OnPreviewKeyDown"
+      SelectionChanged="ListBox_SelectionChanged">
         <ListBox.ContextMenu>
           <ContextMenu>
             <MenuItem Header="Open" Command="{Binding ListOpenCommand}" FontWeight="Bold" InputGestureText="Enter"/>
@@ -417,7 +418,6 @@
           <Style TargetType="ListBoxItem">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
             <EventSetter Event="PreviewMouseDoubleClick" Handler="ListBoxItem_PreviewMouseDoubleClick"/>
             <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown"/>
           </Style>
