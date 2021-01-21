@@ -72,6 +72,7 @@
     <Compile Include="Ipc\TypedMessageHandlers\GetProjectDetailsRequestHandler.cs" />
     <Compile Include="Ipc\TypedMessageHandlers\PauseIndexingRequestHandler.cs" />
     <Compile Include="Ipc\TypedMessageHandlers\ResumeIndexingRequestHandler.cs" />
+    <Compile Include="Projects\IPropertyCollection.cs" />
     <Compile Include="Projects\ProjectPathComparer.cs" />
     <Compile Include="FileSystem\SnapshotScanResult.cs" />
     <Compile Include="Ipc\TypedMessageHandlers\GetDatabaseStatisticsRequestHandler.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Operations\OperationHandlers.cs" />
     <Compile Include="Operations\OperationProcessor.cs" />
     <Compile Include="ProgressTracking\PartialProgressReporter.cs" />
+    <Compile Include="Projects\PropertyCollection.cs" />
     <Compile Include="Search\CompiledTextSearchDataFactory.cs" />
     <Compile Include="Search\CompiledTextSearchProviderFactory.cs" />
     <Compile Include="Search\FilesLoadedResult.cs" />

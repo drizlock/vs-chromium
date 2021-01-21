@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using VsChromium.Core.Configuration;
 using VsChromium.Core.Files;
@@ -66,7 +68,7 @@ namespace VsChromium.Server.Projects.ProjectFile {
     private IProject GetProjectWorker(FullPath path) {
       var project = path
         .EnumeratePaths()
-        .Select(CreateProject)
+        .Select(x => CreateProject(x, path))
         .FirstOrDefault(x => x != null);
       if (project != null) {
         _knownProjectRootDirectories.Add(project.RootPath, project);
@@ -83,7 +85,7 @@ namespace VsChromium.Server.Projects.ProjectFile {
     /// on disk at <paramref name="rootPath"/>.
     /// Return <code>null</code> if there is no project file.
     /// </summary>
-    private Project CreateProject(FullPath rootPath) {
+    private Project CreateProject(FullPath rootPath, FullPath searchPath) {
       var projectFilePath = rootPath.Combine(new RelativePath(ConfigurationFileNames.ProjectFileName));
 
       var ignorePathsSectionName = ConfigurationSectionNames.SourceExplorerIgnore;
@@ -97,13 +99,24 @@ namespace VsChromium.Server.Projects.ProjectFile {
 
       var fileWithSections = new FileWithSections(_fileSystem, projectFilePath);
       var configurationProvider = new FileWithSectionConfigurationProvider(fileWithSections);
+      var propertiesSection = ConfigurationSectionContents.Create(configurationProvider, ConfigurationSectionNames.Properties);
       var ignorePathsSection = ConfigurationSectionContents.Create(configurationProvider, ignorePathsSectionName);
       var ignoreSearchableFilesSection = ConfigurationSectionContents.Create(configurationProvider, ConfigurationSectionNames.SearchableFilesIgnore);
       var includeSearchableFilesSection = ConfigurationSectionContents.Create(configurationProvider, ConfigurationSectionNames.SearchableFilesInclude);
+      var propertyCollection = new PropertyCollection(propertiesSection);
       var fileFilter = new FileFilter(ignorePathsSection);
       var directoryFilter = new DirectoryFilter(ignorePathsSection);
       var searchableFilesFilter = new SearchableFilesFilter(ignoreSearchableFilesSection, includeSearchableFilesSection);
-      return new Project(rootPath, ignorePathsSection, ignoreSearchableFilesSection, includeSearchableFilesSection, fileFilter, directoryFilter, searchableFilesFilter, fileWithSections.Hash);
+
+      int rootDepth = 0;
+      FullPath modifiedRootPath = rootPath;
+      if (propertyCollection.TryGetInt("RootDepth", out rootDepth) && rootDepth > 0) { 
+          int rootPathDepth = rootPath.ToString().Split(Path.DirectorySeparatorChar).Count();
+          IEnumerable<string> pathComponents = searchPath.ToString().Split(Path.DirectorySeparatorChar);
+          modifiedRootPath = new FullPath(string.Join(Path.DirectorySeparatorChar.ToString(), pathComponents.Take(rootPathDepth + rootDepth)));
+      }
+
+      return new Project(modifiedRootPath, ignorePathsSection, ignoreSearchableFilesSection, includeSearchableFilesSection, fileFilter, directoryFilter, searchableFilesFilter, fileWithSections.Hash);
     }
   }
 }
