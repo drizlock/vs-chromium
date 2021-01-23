@@ -92,6 +92,20 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       }
     }
 
+    public bool IsDocked {
+      get {
+        return _frameNotify != null &&
+          _frameNotify.IsDocked;
+      }
+    }
+
+    public void Hide() {
+      var frame = Frame as IVsWindowFrame;
+      if (frame != null) {
+        frame.Hide();
+      }
+    }
+
     public void FocusSearchCodeBox() {
       ExplorerControl.SearchFileTextBox.Focus();
     }

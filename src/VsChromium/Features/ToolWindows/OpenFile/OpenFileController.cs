@@ -188,8 +188,8 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       // We'll get an update soon enough.
       if (treeVersion != _currentFileSystemTreeVersion)
         return;
-      
-        PerformSearch(true);
+
+      PerformSearch(true);
     }
 
     private List<FileEntryViewModel> CreateSearchFilePathsResult(
@@ -198,7 +198,7 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       string additionalWarning,
       bool expandAll) {
       List<FileEntryViewModel> results = fileResults.Entries
-                                           .Select(x => FileEntryViewModel.Create(x))
+                                           .Select(x => FileEntryViewModel.Create(this, x))
                                            .SelectMany(x => x)
                                            .ToList();
       results.Sort((item1, item2) => item1.Filename.CompareTo(item2.Filename));
@@ -277,6 +277,23 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     }
 
     private void TypedRequestProcessProxy_OnEventReceived(TypedEvent typedEvent) {
+    }
+
+    public void OpenFileInEditor(FileEntryViewModel fileEntry) {
+      // Using "Post" is important: it allows the newly opened document to
+      // receive the focus.
+      SynchronizationContextProvider.DispatchThreadContext.Post(() => {
+        // Note: This has to run on the UI thread!
+        OpenDocumentHelper.OpenDocument(fileEntry.Path, null);
+      });
+    }
+
+    public bool ExecuteOpenCommandForItem(FileEntryViewModel fevm) {
+      if (fevm == null)
+        return false;
+
+      fevm.OpenCommand.Execute(fevm);
+      return true;
     }
   }
 }

@@ -365,7 +365,7 @@
     <Compile Include="Views\Clipboard.cs" />
     <Compile Include="Views\IClipboard.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\ICodeSearchController.cs" />
-    <Compile Include="Features\ToolWindows\CodeSearch\CommandDelegate.cs" />
+    <Compile Include="Features\ToolWindows\CommandDelegate.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\CodeSearchItemViewModelBase.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\CodeSearchController.cs" />
     <Compile Include="Features\ToolWindows\ToolWindowAccessor.cs" />

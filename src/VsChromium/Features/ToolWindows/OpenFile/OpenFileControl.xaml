@@ -15,8 +15,10 @@
              x:Name="OpenFileToolWindow"
              Background="{DynamicResource VsBrush.ToolWindowBackground}"
              Foreground="{DynamicResource VsBrush.ToolWindowText}"
-             HorizontalAlignment="Stretch">
+             HorizontalAlignment="Stretch"
+             Padding="10">
     <UserControl.Resources>
+        <openfile:OpenFileViewModel x:Key="mockViewModel"/>
         <!-- Hide context menu items if they are not enabled -->
         <Style TargetType="MenuItem">
             <Style.Triggers>
@@ -26,23 +28,18 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="ListView">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}"/>
-                    <Setter Property="Background" Value="{DynamicResource VsBrush.ComboBoxBackground}"/>
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}"/>
+            <Setter Property="Background" Value="{DynamicResource VsBrush.ToolWindowBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource VsBrush.ComboBoxBackground}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style TargetType="ListViewItem">
+            <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
         </Style>
         <Style TargetType="GridViewColumnHeader">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}"/>
-                    <Setter Property="Background" Value="{DynamicResource VsBrush.ToolWindowBackground}"/>
-                </Trigger>
-            </Style.Triggers>
             <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}"/>
             <Setter Property="Background" Value="{DynamicResource VsBrush.ToolWindowBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource VsBrush.ToolWindowBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource VsBrush.ComboBoxBackground}"/>
             <Setter Property="Height" Value="28"/>
         </Style>
         <Style TargetType="TextBox">
@@ -63,16 +60,15 @@
     <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="4" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <ListView Grid.Row="0"
+            d:DataContext="{StaticResource mockViewModel}"
             ItemsSource="{Binding FileList}"
             x:Name="FileListView" Height="auto"
             VirtualizingStackPanel.IsVirtualizing="True"
-            VirtualizingStackPanel.VirtualizationMode="Recycling"
-            Background="{DynamicResource VsBrush.ToolWindowBackground}"
-            Foreground="{DynamicResource VsBrush.WindowText}"
-            BorderThickness="0">
+            VirtualizingStackPanel.VirtualizationMode="Recycling">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Filename" Width="350" DisplayMemberBinding="{Binding Filename}" />
@@ -82,14 +78,7 @@
         </ListView>
 
         <!-- SEARCH AREA -->
-        <Border Grid.Row="1" BorderBrush="Gray" >
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#33000000" Offset="0" />
-                    <GradientStop Color="#11000000" Offset="1" />
-                </LinearGradientBrush>
-            </Border.Background>
-
+        <Border Grid.Row="2" BorderBrush="Gray" >
             <StackPanel HorizontalAlignment="Stretch" Margin="4,4,4,0" Orientation="Vertical">
                 <!-- Search Boxes -->
                 <Grid HorizontalAlignment="Stretch">
@@ -101,7 +90,7 @@
                     <!-- File Search -->
                     <Grid Grid.Row="{Binding FileSearchRow}" Grid.Column="{Binding FileSearchColumn}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="60"/>
                             <ColumnDefinition Width="*" MinWidth="100"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>

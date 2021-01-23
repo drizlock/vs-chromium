@@ -16,5 +16,8 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     void PerformSearch(bool immediate);
     void FileSearch(string searchPattern);
     void FocusSearch();
+
+    void OpenFileInEditor(FileEntryViewModel fileEntry);
+    bool ExecuteOpenCommandForItem(FileEntryViewModel fevm);
   }
 }

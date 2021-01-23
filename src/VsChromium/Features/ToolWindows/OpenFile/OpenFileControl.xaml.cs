@@ -34,6 +34,7 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
 
     private IDispatchThreadServerRequestExecutor _dispatchThreadServerRequestExecutor;
     private OpenFileController _controller;
+    private OpenFileToolWindow _toolWindow;
 
     public OpenFileControl() {
       InitializeComponent();
@@ -52,6 +53,7 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     /// Called when Visual Studio creates our container ToolWindow.
     /// </summary>
     public void OnVsToolWindowCreated(IServiceProvider serviceProvider) {
+      _toolWindow = serviceProvider as OpenFileToolWindow;
       var componentModel = (IComponentModel)serviceProvider.GetService(typeof(SComponentModel));
 
       _dispatchThreadServerRequestExecutor = componentModel.DefaultExportProvider.GetExportedValue<IDispatchThreadServerRequestExecutor>();
@@ -98,6 +100,20 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       RefreshSearchResults(true);
     }
 
+    void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+      var item = sender as ListBoxItem;
+      if (item == null)
+        return;
+
+      if (!item.IsSelected)
+        return;
+
+      if (Controller.ExecuteOpenCommandForItem(item.DataContext as FileEntryViewModel))
+        e.Handled = true;
+
+      if (!_toolWindow.IsDocked)
+        _toolWindow.Hide();
+    }
 #endregion
   }
 }
