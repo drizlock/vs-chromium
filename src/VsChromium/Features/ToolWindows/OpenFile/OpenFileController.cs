@@ -38,7 +38,6 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     private static class OperationsIds {
       public const string FileSystemScanning = "file-system-scanning";
       public const string FilesLoading = "files-loading";
-      public const string SearchCode = "files-contents-search";
       public const string SearchFilePaths = "file-names-search";
     }
 
@@ -60,7 +59,7 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     private readonly TaskCancellation _taskCancellation;
 
     private long _currentFileSystemTreeVersion = -1;
-    private bool _performSearchOnNextRefresh;
+    private string _cachedSearchPattern;
 
     /// <summary>
     /// For generating unique id n progress bar tracker.
@@ -131,7 +130,7 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       var searchFilePathsText = ViewModel.SearchPattern;
 
       if (string.IsNullOrWhiteSpace(searchFilePathsText)) {
-        //TM_TODO CancelSearch();
+        ViewModel.ClearFileList();
         return;
       }
 
@@ -139,6 +138,10 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     }
 
     public void FileSearch(string searchPattern) {
+      if (!ViewModel.ServerIsRunning) {
+        return;
+      }
+
       if (!string.IsNullOrEmpty(searchPattern)) {
         _control.SearchFileTextBox.Text = searchPattern;
       }
@@ -157,14 +160,24 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
 
     private void FileSystemTreeSource_OnTreeReceived(FileSystemTree fileSystemTree) {
       WpfUtilities.Post(_control, () => {
+        ViewModel.ServerIsRunning = true;
         OnFileSystemTreeScanSuccess(fileSystemTree);
       });
     }
 
     private void FileSystemTreeSource_OnErrorReceived(ErrorResponse errorResponse) {
+
+      ViewModel.ServerIsRunning = false;
     }
 
     private void OnFileSystemTreeScanSuccess(FileSystemTree tree) {
+      if (_cachedSearchPattern != null) {
+        FileSearch(_cachedSearchPattern);
+        _cachedSearchPattern = null;
+      }
+
+      _currentFileSystemTreeVersion = tree.Version;
+      RefreshView(tree.Version);
     }
 
     /// <summary>
@@ -175,12 +188,8 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       // We'll get an update soon enough.
       if (treeVersion != _currentFileSystemTreeVersion)
         return;
-
-      // Perform a new search if the user forced an index refresh
-      if (_performSearchOnNextRefresh) {
-        _performSearchOnNextRefresh = false;
+      
         PerformSearch(true);
-      }
     }
 
     private List<FileEntryViewModel> CreateSearchFilePathsResult(

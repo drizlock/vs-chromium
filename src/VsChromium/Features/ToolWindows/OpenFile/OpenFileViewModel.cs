@@ -20,6 +20,14 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
         _fileList.Add(item);
     }
 
+    public void ClearFileList() {
+      _fileList.Clear();
+    }
+
+    public bool ServerIsRunning {
+      get; set;
+    }
+
     public ObservableCollection<FileEntryViewModel> FileList {
       get { return _fileList; }
     }
