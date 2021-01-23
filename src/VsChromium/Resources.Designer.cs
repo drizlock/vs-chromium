@@ -77,5 +77,14 @@ namespace VsChromium {
                 return ResourceManager.GetString("CodeSearchToolWindowTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open File.
+        /// </summary>
+        internal static string OpenFileToolWindowTitle {
+            get {
+                return ResourceManager.GetString("OpenFileToolWindowTitle", resourceCulture);
+            }
+        }
     }
 }

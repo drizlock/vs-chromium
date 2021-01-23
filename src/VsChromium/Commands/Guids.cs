@@ -10,9 +10,11 @@ namespace VsChromium.Commands {
     public const string GuidVsChromiumCmdSetString = "1d4bc583-de49-4113-af8d-81c62fd4b61b";
     public const string GuidCodeSearchToolWindowString = "42a7d178-f0a2-4981-802f-d0589707d174";
     public const string GuidBuildExplorerToolWindowString = "2A181862-CDB1-41A5-BB9A-686548C482F8";
+    public const string GuidOpenFileToolWindowString = "3fb9830a-2aa1-4b85-bd64-4507c851dec8";
 
     public static readonly Guid GuidVsChromiumCmdSet = new Guid(GuidVsChromiumCmdSetString);
     public static readonly Guid GuidCodeSearchToolWindow = new Guid(GuidCodeSearchToolWindowString);
+    public static readonly Guid GuidOpenFileToolWindow = new Guid(GuidOpenFileToolWindowString);
     public static readonly Guid GuidBuildExplorerToolWindow = new Guid(GuidBuildExplorerToolWindowString);
   };
 }
