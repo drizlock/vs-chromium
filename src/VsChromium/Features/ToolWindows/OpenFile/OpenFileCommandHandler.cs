@@ -8,7 +8,7 @@ using System.ComponentModel.Design;
 using VsChromium.Commands;
 using VsChromium.Package.CommandHandler;
 
-namespace VsChromium.Features.ToolWindows.CodeSearch {
+namespace VsChromium.Features.ToolWindows.OpenFile {
   [Export(typeof(IPackageCommandHandler))]
   public class OpenFilePathsCommandHandler : PackageCommandHandlerBase {
     private readonly IToolWindowAccessor _toolWindowAccessor;
@@ -20,7 +20,7 @@ namespace VsChromium.Features.ToolWindows.CodeSearch {
 
     public override CommandID CommandId {
       get {
-        return new CommandID(GuidList.GuidVsChromiumCmdSet, (int)PkgCmdIdList.CmdidQuickSearchFilePaths);
+        return new CommandID(GuidList.GuidVsChromiumCmdSet, (int)PkgCmdIdList.CmdidOpenFile);
       }
     }
 

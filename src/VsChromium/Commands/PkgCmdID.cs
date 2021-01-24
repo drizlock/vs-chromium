@@ -27,5 +27,6 @@ namespace VsChromium.Commands {
     CmdidCopyFileFullPathPosix = 0x141,
     CmdidCopyFileRelativePathPosix = 0x143,
     CmdidOpenContainingFolder = 0x144,
+    CmdidOpenFile = 0x145,
   };
 }
