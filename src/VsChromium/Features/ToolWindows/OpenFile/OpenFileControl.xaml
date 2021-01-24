@@ -152,7 +152,7 @@
                 d:DataContext="{StaticResource mockViewModel}"
                 ItemsSource="{Binding FileList}"
                 x:Name="FileListView" Height="auto"
-                VirtualizingStackPanel.IsVirtualizing="True"
+                VirtualizingStackPanel.IsVirtualizing="False"
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 PreviewKeyDown="FileListView_PreviewKeyDown">
                 <ListView.View>

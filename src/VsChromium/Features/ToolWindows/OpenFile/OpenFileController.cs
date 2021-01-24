@@ -238,7 +238,9 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
               sw.Elapsed.TotalSeconds,
               processedSearchPattern);
             var viewModel = CreateSearchFilePathsResult(response.SearchResult, msg, "", true);
-            ViewModel.UpdateFileList(viewModel); }, OnDispatchThreadError = errorResponse => {
+            ViewModel.UpdateFileList(viewModel);
+            _control.UpdateSelection();
+        }, OnDispatchThreadError = errorResponse => {
           if (cancellationToken.IsCancellationRequested)
             return; }
       };

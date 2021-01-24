@@ -89,6 +89,27 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       get { return _controller; }
     }
 
+    public void UpdateSelection() {
+      FileListView.SelectedItems.Clear();
+
+      if (FileListView.Items.Count > 0) {
+        int index = 0;
+        int spaceIndex = SearchFileTextBox.Text.IndexOf(" ");
+        string matchWord = spaceIndex > -1 ? SearchFileTextBox.Text.Substring(0, spaceIndex) : SearchFileTextBox.Text;
+
+        for (int i = 0; i < FileListView.Items.Count; ++i) {
+          FileEntryViewModel fileEntry = FileListView.Items[i] as FileEntryViewModel;
+          if (fileEntry.Filename.StartsWith(matchWord, StringComparison.CurrentCultureIgnoreCase)) {
+            index = i;
+            break;
+          }
+        }
+
+        FileListView.SelectedItems.Add(FileListView.Items[index]);
+        FileListView.ScrollIntoView(FileListView.Items[index]);
+      }
+    }
+
 #region WPF Event handlers
 
     private void RefreshSearchResults(bool immediate) {
@@ -111,7 +132,9 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
 
     private void FileListView_PreviewKeyDown(object sender, KeyEventArgs e) {
       if (e.Key == Key.Enter) {
-        e.Handled = OpenFile(FileListView.SelectedItem as FileEntryViewModel);
+        foreach (var item in FileListView.SelectedItems) {
+          OpenFile(item as FileEntryViewModel);
+        }
       } else if (e.Key == Key.Escape) {
         if (!_toolWindow.IsDocked)
           _toolWindow.Hide();
@@ -128,7 +151,9 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
           container.Focus();
         }
       } else if (e.Key == Key.Enter) {
-        e.Handled = OpenFile(FileListView.SelectedItem as FileEntryViewModel);
+        foreach (var item in FileListView.SelectedItems) {
+          OpenFile(item as FileEntryViewModel);
+        }
       } else if (e.Key == Key.Escape) {
         if (!_toolWindow.IsDocked)
           _toolWindow.Hide();
