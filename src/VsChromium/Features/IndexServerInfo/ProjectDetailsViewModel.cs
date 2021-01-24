@@ -4,7 +4,7 @@
 
 using System;
 using VsChromium.Core.Ipc.TypedMessages;
-using VsChromium.Features.ToolWindows.CodeSearch;
+using VsChromium.Features.ToolWindows;
 using VsChromium.Wpf;
 
 namespace VsChromium.Features.IndexServerInfo {

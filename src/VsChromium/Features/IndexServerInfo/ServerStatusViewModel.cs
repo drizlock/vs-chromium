@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 using System;
-using VsChromium.Features.ToolWindows.CodeSearch;
+using VsChromium.Features.ToolWindows;
 using VsChromium.Wpf;
 
 namespace VsChromium.Features.IndexServerInfo {

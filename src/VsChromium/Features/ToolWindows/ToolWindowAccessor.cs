@@ -9,6 +9,7 @@ using VsChromium.Commands;
 using VsChromium.Features.ToolWindows.BuildExplorer;
 using VsChromium.Features.ToolWindows.CodeSearch;
 using VsChromium.Package;
+using VsChromium.Features.ToolWindows.OpenFile;
 
 namespace VsChromium.Features.ToolWindows {
   [Export(typeof(IToolWindowAccessor))]
@@ -47,6 +48,12 @@ namespace VsChromium.Features.ToolWindows {
     public CodeSearchToolWindow CodeSearch {
       get {
         return GetToolWindow<CodeSearchToolWindow>(GuidList.GuidCodeSearchToolWindow);
+      }
+    }
+
+    public OpenFileToolWindow OpenFile {
+      get {
+        return GetToolWindow<OpenFileToolWindow>(GuidList.GuidOpenFileToolWindow);
       }
     }
 

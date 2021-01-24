@@ -276,6 +276,16 @@
     <Compile Include="Features\ToolWindows\CodeSearch\FlatFilePositionViewModel.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\IFileEntryViewModel.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\IFileSystemEntryViewModel.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\MockOpenFileViewModel.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\FileEntryViewModel.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\IOpenFileController.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\OpenFileControl.xaml.cs">
+      <DependentUpon>OpenFileControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Features\ToolWindows\OpenFile\OpenFileController.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\OpenFileToolWindow.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\OpenFileViewModel.cs" />
+    <Compile Include="Features\ToolWindows\VsWindowFrameNotifyHandler.cs" />
     <Compile Include="Views\VsRunningDocTableEvents.cs" />
     <Compile Include="Wpf\HumanReadableBytesValueConverter.cs" />
     <Compile Include="Features\IndexServerInfo\ServerDetailsDialog.xaml.cs">
@@ -300,7 +310,7 @@
     <Compile Include="Threads\IDispatchThreadDelayedOperationExecutor.cs" />
     <Compile Include="Views\ITextDocumentTable.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\QuickSearchCodeCommandHandler.cs" />
-    <Compile Include="Features\ToolWindows\CodeSearch\QuickSearchFilePathsCommandHandler.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\OpenFileCommandHandler.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\SearchResultsDocumentChangeTracker.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\DocumentChangeTrackingEntry.cs" />
     <Compile Include="Views\TextDocumentTable.cs" />
@@ -313,7 +323,6 @@
     <Compile Include="Features\ToolWindows\CodeSearch\GlobalPreviousLocationCommandHandler.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\NextLocationCommandHandler.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\PreviousLocationCommandHandler.cs" />
-    <Compile Include="Features\ToolWindows\CodeSearch\VsWindowFrameNotifyHandler.cs" />
     <Compile Include="Features\ToolWindows\TextErrorItemViewModel.cs" />
     <Compile Include="Features\ToolWindows\ChromiumExplorerViewModelBase.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\GlobalNextLocationCommandHandler.cs" />
@@ -357,7 +366,7 @@
     <Compile Include="Views\Clipboard.cs" />
     <Compile Include="Views\IClipboard.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\ICodeSearchController.cs" />
-    <Compile Include="Features\ToolWindows\CodeSearch\CommandDelegate.cs" />
+    <Compile Include="Features\ToolWindows\CommandDelegate.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\CodeSearchItemViewModelBase.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\CodeSearchController.cs" />
     <Compile Include="Features\ToolWindows\ToolWindowAccessor.cs" />
@@ -504,6 +513,10 @@
     <Page Include="Features\IndexServerInfo\DirectoryDetailsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Features\ToolWindows\OpenFile\OpenFileControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

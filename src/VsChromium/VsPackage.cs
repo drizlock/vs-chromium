@@ -19,6 +19,7 @@ using VsChromium.Features.ToolWindows.CodeSearch;
 using VsChromium.Package;
 using VsChromium.ToolsOptions;
 using IServiceProvider = System.IServiceProvider;
+using VsChromium.Features.ToolWindows.OpenFile;
 
 namespace VsChromium {
   [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
@@ -28,6 +29,7 @@ namespace VsChromium {
   // VS 2012 and later since package updates is more explicit).
   [ProvideMenuResource("Menus.ctmenu", 13)]
   [ProvideToolWindow(typeof(CodeSearchToolWindow))]
+  [ProvideToolWindow(typeof(OpenFileToolWindow))]
   [ProvideToolWindow(typeof(BuildExplorerToolWindow))]
   [Guid(GuidList.GuidVsChromiumPkgString)]
   [ProvideOptionPage(

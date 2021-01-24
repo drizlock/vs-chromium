@@ -123,4 +123,7 @@
   <data name="CodeSearchToolWindowTitle" xml:space="preserve">
     <value>Code Search</value>
   </data>
+  <data name="OpenFileToolWindowTitle" xml:space="preserve">
+    <value>Open File</value>
+  </data>
 </root>
