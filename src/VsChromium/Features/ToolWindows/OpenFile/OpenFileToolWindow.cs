@@ -12,6 +12,7 @@ using VsChromium.Commands;
 using VsChromium.Features.AutoUpdate;
 using VsChromium.Package.CommandHandler;
 using VsChromium.Wpf;
+using System.Windows.Forms;
 
 namespace VsChromium.Features.ToolWindows.OpenFile {
   /// <summary>
@@ -68,6 +69,19 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       var commandService = (IMenuCommandService)GetService(typeof(IMenuCommandService));
       commands.ForEach(handler =>
                          commandService.AddCommand(handler.ToOleMenuCommand()));
+    }
+
+    protected override bool PreProcessMessage(ref Message m) {
+      if (!IsDocked) {
+        int WM_KEYDOWN = 0x100;
+        if (m.Msg == WM_KEYDOWN) {
+          Keys wParam = (Keys)((int)((long)m.WParam));
+          if ((wParam == Keys.Escape)) {
+            Hide();
+          }
+        }
+      }
+      return base.PreProcessMessage(ref m);
     }
 
     protected override void Dispose(bool disposing) {
