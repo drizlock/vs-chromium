@@ -18,7 +18,7 @@
              HorizontalAlignment="Stretch"
              Padding="10">
     <UserControl.Resources>
-        <openfile:OpenFileViewModel x:Key="mockViewModel"/>
+        <openfile:MockOpenFileViewModel x:Key="mockViewModel"/>
         <!-- Hide context menu items if they are not enabled -->
         <Style TargetType="MenuItem">
             <Style.Triggers>
@@ -27,20 +27,104 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="GridViewColumnHeaderGripper" TargetType="{x:Type Thumb}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Canvas.Right" Value="-9"/>
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="{Binding Path=ActualHeight,RelativeSource={RelativeSource TemplatedParent}}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundHover}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border Padding="{TemplateBinding Padding}" Background="Transparent">
+                            <Rectangle HorizontalAlignment="Center" Width="1" Fill="{DynamicResource {x:Static vsfx:VsBrushes.AccentBorderKey}}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="ListView">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}"/>
             <Setter Property="Background" Value="{DynamicResource VsBrush.ToolWindowBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource VsBrush.ComboBoxBackground}"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderThickness" Value="0"/>
         </Style>
         <Style TargetType="ListViewItem">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}"/>
+            <Setter Property="Padding"  Value="5,2,5,2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Border Name="SelectionBorder" Visibility="Collapsed" BorderThickness="1" />
+                            <Border Name="Selection" Visibility="Collapsed" Opacity="0.25" />
+                            <!-- This is used when GridView is put inside the ListView -->
+                            <GridViewRowPresenter Grid.RowSpan="2"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="Selection" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="SelectionBorder" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="Selection" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
+                                <Setter TargetName="SelectionBorder" Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightTextKey}}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
             <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
         </Style>
         <Style TargetType="GridViewColumnHeader">
-            <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}"/>
-            <Setter Property="Background" Value="{DynamicResource VsBrush.ToolWindowBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource VsBrush.ComboBoxBackground}"/>
-            <Setter Property="Height" Value="28"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4,3,4,3"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonText}"/>
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
+                        <Grid SnapsToDevicePixels="true">
+                            <Border Name="HeaderBorder" BorderThickness="0" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition MaxHeight="7"/>
+                                        <RowDefinition/>
+                                        <RowDefinition MaxHeight="1"/>
+                                    </Grid.RowDefinitions>
+                                    <Border Grid.RowSpan="2" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter Name="HeaderContent"
+                                            Margin="0,0,0,1"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            RecognizesAccessKey="True"
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                    </Border>
+                                    <Rectangle Grid.Row="2" Height="1" Fill="{DynamicResource {x:Static vsfx:VsBrushes.AccentBorderKey}}"/>
+                                </Grid>
+                            </Border>
+                            <Canvas>
+                                <Thumb x:Name="PART_HeaderGripper" Style="{StaticResource GridViewColumnHeaderGripper}" Visibility="Visible"/>
+                            </Canvas>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style TargetType="TextBox">
             <Style.Triggers>
@@ -63,19 +147,21 @@
             <RowDefinition Height="4" />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <ListView Grid.Row="0"
-            d:DataContext="{StaticResource mockViewModel}"
-            ItemsSource="{Binding FileList}"
-            x:Name="FileListView" Height="auto"
-            VirtualizingStackPanel.IsVirtualizing="True"
-            VirtualizingStackPanel.VirtualizationMode="Recycling">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Filename" Width="350" DisplayMemberBinding="{Binding Filename}" />
-                    <GridViewColumn Header="Path" Width="600" DisplayMemberBinding="{Binding Path}" />
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Border Grid.Row="0" BorderThickness="1" BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.AccentBorderKey}}">
+            <ListView
+                d:DataContext="{StaticResource mockViewModel}"
+                ItemsSource="{Binding FileList}"
+                x:Name="FileListView" Height="auto"
+                VirtualizingStackPanel.IsVirtualizing="True"
+                VirtualizingStackPanel.VirtualizationMode="Recycling">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Filename" Width="350" DisplayMemberBinding="{Binding Filename}" />
+                        <GridViewColumn Header="Path" Width="600" DisplayMemberBinding="{Binding Path}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
 
         <!-- SEARCH AREA -->
         <Border Grid.Row="2" BorderBrush="Gray" >

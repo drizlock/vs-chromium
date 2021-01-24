@@ -276,6 +276,7 @@
     <Compile Include="Features\ToolWindows\CodeSearch\FlatFilePositionViewModel.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\IFileEntryViewModel.cs" />
     <Compile Include="Features\ToolWindows\CodeSearch\IFileSystemEntryViewModel.cs" />
+    <Compile Include="Features\ToolWindows\OpenFile\MockOpenFileViewModel.cs" />
     <Compile Include="Features\ToolWindows\OpenFile\FileEntryViewModel.cs" />
     <Compile Include="Features\ToolWindows\OpenFile\IOpenFileController.cs" />
     <Compile Include="Features\ToolWindows\OpenFile\OpenFileControl.xaml.cs">
