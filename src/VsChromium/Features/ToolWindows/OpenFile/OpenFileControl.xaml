@@ -93,7 +93,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="4,3,4,3"/>
-            <Setter Property="Foreground" Value="{DynamicResource ButtonText}"/>
+            <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}"/>
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Margin" Value="0" />
             <Setter Property="Template">
@@ -153,7 +153,8 @@
                 ItemsSource="{Binding FileList}"
                 x:Name="FileListView" Height="auto"
                 VirtualizingStackPanel.IsVirtualizing="True"
-                VirtualizingStackPanel.VirtualizationMode="Recycling">
+                VirtualizingStackPanel.VirtualizationMode="Recycling"
+                PreviewKeyDown="FileListView_PreviewKeyDown">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Filename" Width="350" DisplayMemberBinding="{Binding Filename}" />
@@ -181,7 +182,8 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="File Paths:" VerticalAlignment="Center" Foreground="{DynamicResource VsBrush.WindowText}" />
-                        <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchFileTextBox">
+                        <TextBox Grid.Row="0" Grid.Column="1" 
+                                 x:Name="SearchFileTextBox" PreviewKeyDown="SearchFileTextBox_PreviewKeyDown">
                         </TextBox>
                         <Button Grid.Row="0" Grid.Column="2" IsTabStop="False"
                               Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"

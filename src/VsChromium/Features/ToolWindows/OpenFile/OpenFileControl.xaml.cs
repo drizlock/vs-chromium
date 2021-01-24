@@ -98,6 +98,7 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     private void ClearFilePathsPattern_Click(object sender, RoutedEventArgs e) {
       SearchFileTextBox.Text = "";
       RefreshSearchResults(true);
+      SearchFileTextBox.Focus();
     }
 
     void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
@@ -105,14 +106,43 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
       if (item == null)
         return;
 
-      if (!item.IsSelected)
-        return;
+      e.Handled = OpenFile(item.DataContext as FileEntryViewModel);
+    }
 
-      if (Controller.ExecuteOpenCommandForItem(item.DataContext as FileEntryViewModel))
-        e.Handled = true;
+    private void FileListView_PreviewKeyDown(object sender, KeyEventArgs e) {
+      if (e.Key == Key.Enter) {
+        e.Handled = OpenFile(FileListView.SelectedItem as FileEntryViewModel);
+      } else if (e.Key == Key.Escape) {
+        if (!_toolWindow.IsDocked)
+          _toolWindow.Hide();
+      } else if (e.Key != Key.Up && e.Key != Key.Down) {
+        SearchFileTextBox.Focus();
+      }
+    }
 
-      if (!_toolWindow.IsDocked)
-        _toolWindow.Hide();
+    private void SearchFileTextBox_PreviewKeyDown(object sender, KeyEventArgs e) {
+      if (e.Key == Key.Up || e.Key == Key.Down) {
+        FileListView.Focus();
+        var container = (UIElement)FileListView.ItemContainerGenerator.ContainerFromItem(FileListView.SelectedItem);
+        if (container != null) {
+          container.Focus();
+        }
+      } else if (e.Key == Key.Enter) {
+        e.Handled = OpenFile(FileListView.SelectedItem as FileEntryViewModel);
+      } else if (e.Key == Key.Escape) {
+        if (!_toolWindow.IsDocked)
+          _toolWindow.Hide();
+      }
+    }
+
+    private bool OpenFile(FileEntryViewModel item) {
+      if (Controller.ExecuteOpenCommandForItem(item)) {
+        if (!_toolWindow.IsDocked)
+          _toolWindow.Hide();
+        return true;
+      }
+
+      return false;
     }
 #endregion
   }
