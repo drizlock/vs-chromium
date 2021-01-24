@@ -9,6 +9,8 @@
              xmlns:theme="clr-namespace:VsChromium.Views"
              xmlns:toolWindows="clr-namespace:VsChromium.Features.ToolWindows"
              xmlns:openfile="clr-namespace:VsChromium.Features.ToolWindows.OpenFile"
+             xmlns:scm ="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             xmlns:dat ="clr-namespace:System.Windows.Data;assembly=PresentationFramework"
              mc:Ignorable="d" 
              d:DesignHeight="1000" d:DesignWidth="900"
              d:DataContext="{d:DesignInstance openfile:OpenFileViewModel, IsDesignTimeCreatable=True}"
@@ -84,7 +86,6 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
         </Style>
         <Style TargetType="GridViewColumnHeader">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -100,28 +101,44 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
                         <Grid SnapsToDevicePixels="true">
-                            <Border Name="HeaderBorder" BorderThickness="0" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition MaxHeight="7"/>
-                                        <RowDefinition/>
-                                        <RowDefinition MaxHeight="1"/>
-                                    </Grid.RowDefinitions>
-                                    <Border Grid.RowSpan="2" Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition MaxHeight="7"/>
+                                    <RowDefinition/>
+                                    <RowDefinition MaxHeight="1"/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.RowSpan="2" Name="HeaderBorder" BorderThickness="0" Opacity="1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}"/>
+                                <Border Grid.RowSpan="2" Padding="{TemplateBinding Padding}">
                                         <ContentPresenter Name="HeaderContent"
                                             Margin="0,0,0,1"
                                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                             RecognizesAccessKey="True"
                                             SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                    </Border>
-                                    <Rectangle Grid.Row="2" Height="1" Fill="{DynamicResource {x:Static vsfx:VsBrushes.ActiveBorderKey}}"/>
+                                </Border>
+                                <Rectangle Grid.Row="2" Height="1" Fill="{DynamicResource {x:Static vsfx:VsBrushes.ActiveBorderKey}}"/>
                                 </Grid>
-                            </Border>
                             <Canvas>
                                 <Thumb x:Name="PART_HeaderGripper" Style="{StaticResource GridViewColumnHeaderGripper}" Visibility="Visible"/>
                             </Canvas>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
+                                <Setter TargetName="HeaderBorder" Property="Opacity" Value="0.25"/>
+                                <Setter TargetName="PART_HeaderGripper" Property="Background" Value="Transparent"/>
+                                <Setter TargetName="PART_HeaderGripper" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightTextKey}}"/>
+                                <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
+                                <Setter TargetName="HeaderBorder" Property="Opacity" Value="1"/>
+                                <Setter TargetName="PART_HeaderGripper" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                            <Trigger Property="Height" Value="Auto">
+                                <Setter Property="MinHeight" Value="20"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -139,6 +156,12 @@
             <Setter Property="Margin" Value="0,0,0,0"/>
             <Setter Property="Text" Value="{Binding NewItem, UpdateSourceTrigger=LostFocus}"/>
         </Style>
+        <CollectionViewSource Source="{Binding FileList}" x:Key="FileListView">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Filename"/>
+                <scm:SortDescription PropertyName="Path"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
     </UserControl.Resources>
 
     <Grid HorizontalAlignment="Stretch">
@@ -150,15 +173,17 @@
         <Border Grid.Row="0" BorderThickness="1" BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.ActiveBorderKey}}">
             <ListView
                 d:DataContext="{StaticResource mockViewModel}"
-                ItemsSource="{Binding FileList}"
+                ItemsSource="{Binding Source={StaticResource FileListView}}"
                 x:Name="FileListView" Height="auto"
                 VirtualizingStackPanel.IsVirtualizing="False"
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
-                PreviewKeyDown="FileListView_PreviewKeyDown">
+                PreviewKeyDown="FileListView_PreviewKeyDown"
+                ListViewItem.MouseDoubleClick="ListViewItem_MouseDoubleClick"
+                GridViewColumnHeader.Click="GridViewColumnHeader_Click">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Filename" Width="350" DisplayMemberBinding="{Binding Filename}" />
-                        <GridViewColumn Header="Path" Width="600" DisplayMemberBinding="{Binding Path}" />
+                        <GridViewColumn Header="Path" Width="Auto" DisplayMemberBinding="{Binding Path}" />
                     </GridView>
                 </ListView.View>
             </ListView>

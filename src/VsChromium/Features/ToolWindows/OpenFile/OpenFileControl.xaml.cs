@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using VsChromium.Core.Logging;
@@ -35,6 +36,7 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     private IDispatchThreadServerRequestExecutor _dispatchThreadServerRequestExecutor;
     private OpenFileController _controller;
     private OpenFileToolWindow _toolWindow;
+    private ListSortDirection _sortDirection;
 
     public OpenFileControl() {
       InitializeComponent();
@@ -128,6 +130,49 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
         return;
 
       e.Handled = OpenFile(item.DataContext as FileEntryViewModel);
+    }
+
+    void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) {
+      GridViewColumnHeader headerClicked = e.OriginalSource as GridViewColumnHeader;
+      ListView listView = sender as ListView;
+      ICollectionView view = CollectionViewSource.GetDefaultView(listView.ItemsSource);
+
+      if (headerClicked.Column == null)
+        return;
+
+      string header = "";
+      if (headerClicked.Column.DisplayMemberBinding != null) {
+        header = ((System.Windows.Data.Binding)headerClicked.Column.DisplayMemberBinding).Path.Path;
+      } else {
+        try {
+          DataTemplate cellTemplate = headerClicked.Column.CellTemplate;
+          Grid grid = cellTemplate.LoadContent() as Grid;
+          TextBlock textBlock = grid.Children.OfType<TextBlock>().FirstOrDefault();
+          header = BindingOperations.GetBinding(textBlock, TextBlock.TextProperty).Path.Path;
+        } catch {
+        }
+      }
+
+      string lastHeaderName = view.SortDescriptions[0].PropertyName;
+      ListSortDirection lastDirection = view.SortDescriptions[0].Direction;
+      if (headerClicked != null) {
+        if (headerClicked.Role != GridViewColumnHeaderRole.Padding) {
+          if (header != lastHeaderName) {
+            _sortDirection = ListSortDirection.Ascending;
+          } else {
+            if (lastDirection == ListSortDirection.Ascending) {
+              _sortDirection = ListSortDirection.Descending;
+            } else {
+              _sortDirection = ListSortDirection.Ascending;
+            }
+          }
+          if (header != "") {
+            SortDescription monsort = new SortDescription(header, _sortDirection);
+            view.SortDescriptions.Clear();
+            view.SortDescriptions.Add(monsort);
+          }
+        }
+      }
     }
 
     private void FileListView_PreviewKeyDown(object sender, KeyEventArgs e) {
