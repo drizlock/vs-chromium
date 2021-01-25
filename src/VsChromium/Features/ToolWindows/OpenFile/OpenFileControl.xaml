@@ -65,7 +65,7 @@
                     <ControlTemplate TargetType="{x:Type ListViewItem}">
                         <Grid Background="{TemplateBinding Background}">
                             <Border Name="SelectionBorder" Visibility="Collapsed" BorderThickness="1" />
-                            <Border Name="Selection" Visibility="Collapsed" Opacity="0.25" />
+                            <Border Name="Selection" Visibility="Collapsed" />
                             <!-- This is used when GridView is put inside the ListView -->
                             <GridViewRowPresenter Grid.RowSpan="2"
                                           Margin="{TemplateBinding Padding}"
@@ -75,9 +75,18 @@
 
                         </Grid>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="Selection" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="SelectionBorder" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="Selection" Property="Opacity" Value="0.05"/>
+                                <Setter TargetName="Selection" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
+                                <Setter TargetName="SelectionBorder" Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}" />
+                            </Trigger>
                             <Trigger Property="IsSelected" Value="true">
                                 <Setter TargetName="Selection" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="SelectionBorder" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="Selection" Property="Opacity" Value="0.25"/>
                                 <Setter TargetName="Selection" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
                                 <Setter TargetName="SelectionBorder" Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.HighlightKey}}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource VsBrush.ToolWindowText}" />
@@ -86,6 +95,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
         </Style>
         <Style TargetType="GridViewColumnHeader">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -178,7 +188,6 @@
                 VirtualizingStackPanel.IsVirtualizing="False"
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 PreviewKeyDown="FileListView_PreviewKeyDown"
-                ListViewItem.MouseDoubleClick="ListViewItem_MouseDoubleClick"
                 GridViewColumnHeader.Click="GridViewColumnHeader_Click">
                 <ListView.View>
                     <GridView>

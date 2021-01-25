@@ -123,6 +123,9 @@ namespace VsChromium.Features.ToolWindows.OpenFile {
     public void FocusSearchCodeBox() {
       ExplorerControl.SearchFileTextBox.Focus();
       ExplorerControl.SearchFileTextBox.SelectAll();
+      if (ExplorerControl.FileListView.SelectedItem != null) {
+        ExplorerControl.FileListView.ScrollIntoView(ExplorerControl.FileListView.SelectedItem);
+      }
     }
 
     int IOleCommandTarget.QueryStatus(ref System.Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, System.IntPtr pCmdText) {
